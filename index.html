@@ -1,1170 +1,173 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Prop Firm Tracker</title>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Debt tracker</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;800&display=swap">
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap');
-:root {
-  --bg:#0d0f14; --s1:#13161d; --s2:#1a1e27; --s3:#21263200;
-  --border:#252932; --border-hi:#333a47;
-  --t1:#e8eaf0; --t2:#9ba3b2; --t3:#5c6372;
-  --green:#3dd68c; --green-bg:#0d2b1e; --green-dim:#1a4030;
-  --amber:#f5a623; --amber-bg:#2b1f08;
-  --blue:#5b8ef0;  --blue-bg:#0d1a33;
-  --red:#f05b5b;   --red-bg:#2b0d0d;
-  --mono:'JetBrains Mono',monospace;
-  --sans:'Inter',system-ui,sans-serif;
-  --r:8px; --rl:12px;
-}
-*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
-body{background:var(--bg);color:var(--t1);font-family:var(--sans);font-size:14px;min-height:100vh;}
+:root{--bg:#EDF0F4;--surface:#fff;--ink:#101828;--mut:#5A6578;--line:#D5DBE5;--eval:#64748B;--build:#D98E04;--pay:#0B8A5E;--debt:#D92D4F;--bt:#fff;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0E131B;--surface:#161D28;--ink:#E7ECF3;--mut:#9AA6B8;--line:#2A3444;--eval:#7C8CA3;--build:#E2A52B;--pay:#2BC48A;--debt:#FF6B88;--bt:#08130E}}
+:root[data-theme="dark"]{--bg:#0E131B;--surface:#161D28;--ink:#E7ECF3;--mut:#9AA6B8;--line:#2A3444;--eval:#7C8CA3;--build:#E2A52B;--pay:#2BC48A;--debt:#FF6B88;--bt:#08130E}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:Manrope,system-ui,-apple-system,"Segoe UI",sans-serif;line-height:1.5}
+main{max-width:1000px;margin:0 auto;padding:28px 16px 48px}
+h1{font-size:clamp(1.9rem,6vw,3.1rem);line-height:1.05;font-weight:800;margin:0 0 6px;letter-spacing:-.02em}
+h2{font-size:1.15rem;margin:34px 0 10px}.mut{color:var(--mut)}
+.ctl{display:flex;flex-wrap:wrap;gap:10px 22px;align-items:center;margin:16px 0}
+.ctl label{font-size:.88rem}.ctl input[type=range]{width:170px;max-width:100%;accent-color:var(--pay)}.ctl output{font-weight:800}
+input[type=number],input[type=date]{font:inherit;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:6px;padding:6px 8px;width:100%}
+.ctl input[type=number]{width:110px}
+button{font:inherit;font-weight:600;color:var(--ink);background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:7px 14px;cursor:pointer}
+button.pri{background:var(--pay);border-color:var(--pay);color:var(--bt)}
+.stats{display:flex;flex-wrap:wrap;gap:8px 30px}.stats div{min-width:130px}.stats b{display:block;font-size:1.15rem}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:12px}
+.row{display:flex;flex-wrap:wrap;gap:10px 14px;align-items:flex-end;margin-bottom:12px}.row label{font-size:.85rem;color:var(--mut)}
+.egrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(175px,1fr));gap:10px}
+.eg{display:block;font-size:.8rem;font-weight:600}.eg small{display:block;font-weight:400;color:var(--mut);margin-bottom:2px}
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(285px,1fr));gap:10px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:12px;font-size:.85rem}
+.card h3{margin:0;font-size:.95rem;display:flex;justify-content:space-between;gap:8px}
+.chip{font-size:.7rem;font-weight:700;border-radius:99px;padding:1px 9px;background:color-mix(in srgb,var(--eval) 25%,transparent)}
+.chip.f{background:color-mix(in srgb,var(--build) 30%,transparent)}.chip.u{background:color-mix(in srgb,var(--pay) 30%,transparent)}
+.big{font-size:1.25rem;font-weight:800}
+.bar{height:8px;border-radius:5px;background:var(--line);margin:6px 0 8px;overflow:hidden}.bar i{display:block;height:100%;background:var(--pay)}
+.scroll{overflow-x:auto}.scroll svg{min-width:680px;display:block;width:100%;height:auto}
+svg text{fill:var(--mut);font-family:inherit;font-size:11px}svg .bt{fill:var(--bt);font-weight:600;font-size:10.5px}
+.leg{display:flex;flex-wrap:wrap;gap:6px 18px;margin-top:8px;font-size:.85rem;color:var(--mut)}.leg i{display:inline-block;width:12px;height:12px;border-radius:3px;margin-right:6px;vertical-align:-1px}
+table{border-collapse:collapse;width:100%;font-size:.85rem}th,td{padding:6px 8px;text-align:right;border-bottom:1px solid var(--line)}th:first-child,td:first-child{text-align:left}th{color:var(--mut);font-weight:600}
+.neg{color:var(--debt)}.pos{color:var(--pay)}
+.note{font-size:.85rem;color:var(--mut);margin-top:26px;max-width:75ch}
+</style></head><body><main>
+<p class="mut" style="margin:0">Debt tracker: Tradeify, Lucid and the 100K static account</p>
+<h1 id="hero"></h1>
+<p id="delta" class="mut" style="margin:0"></p>
+<div class="ctl">
+ <label>Daily goal until an account unlocks <input id="t" type="range" min="20" max="100" step="5" value="60"> <output id="tv"></output></label>
+ <label>Daily goal after unlocking <input id="t2" type="range" min="20" max="200" step="5" value="100"> <output id="tv2"></output></label>
+ <label>Debt remaining <input id="debt" type="number" min="0" step="1" value="33000"></label>
+</div>
+<div class="stats" id="stats"></div>
 
-/* ── Layout ── */
-.shell{display:flex;min-height:100vh;}
-.sidebar{width:220px;min-width:220px;background:var(--s1);border-right:1px solid var(--border);display:flex;flex-direction:column;padding:24px 0;position:fixed;top:0;left:0;bottom:0;z-index:10;}
-.logo{padding:0 20px 24px;border-bottom:1px solid var(--border);margin-bottom:16px;}
-.logo-main{font-size:15px;font-weight:600;letter-spacing:-0.3px;}
-.logo-sub{font-size:11px;color:var(--t3);margin-top:3px;font-family:var(--mono);}
-.nav-section{padding:0 12px;margin-bottom:8px;}
-.nav-lbl{font-size:10px;color:var(--t3);text-transform:uppercase;letter-spacing:.08em;padding:0 8px;margin-bottom:4px;}
-.nav-btn{display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:var(--r);font-size:13px;color:var(--t2);cursor:pointer;border:none;background:transparent;width:100%;text-align:left;transition:all .12s;}
-.nav-btn:hover{background:var(--s2);color:var(--t1);}
-.nav-btn.active{background:var(--blue-bg);color:var(--blue);}
-.nav-icon{font-size:15px;width:18px;text-align:center;}
-.sidebar-footer{margin-top:auto;padding:16px 20px 0;border-top:1px solid var(--border);font-size:11px;color:var(--t3);line-height:1.8;}
-.main{margin-left:220px;flex:1;padding:28px 32px;max-width:1400px;}
-.page{display:none;}.page.active{display:block;}
-.page-header{margin-bottom:24px;}
-.page-header h1{font-size:20px;font-weight:600;letter-spacing:-0.4px;}
-.page-header p{font-size:13px;color:var(--t3);margin-top:4px;}
+<h2>Log a trading day</h2>
+<div class="panel">
+ <div class="row"><label>Date<input id="dt" type="date" min="2026-10-14"></label><button id="save" class="pri">Save day</button><span id="msg" class="mut"></span></div>
+ <div class="egrid" id="grid"></div>
+ <p id="daytot" class="mut" style="margin:10px 0 0"></p>
+</div>
 
-/* ── KPI strip ── */
-.kpi-strip{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;margin-bottom:24px;}
-.kpi{background:var(--s1);border:1px solid var(--border);border-radius:var(--rl);padding:14px 16px;}
-.kpi .kl{font-size:11px;color:var(--t3);margin-bottom:6px;text-transform:uppercase;letter-spacing:.05em;}
-.kpi .kv{font-size:22px;font-weight:500;font-family:var(--mono);}
-.kpi .ks{font-size:11px;color:var(--t3);margin-top:3px;}
-.green{color:var(--green);}.red{color:var(--red);}.amber{color:var(--amber);}.blue{color:var(--blue);}
+<h2>Accounts</h2><div class="cards" id="accts"></div>
 
-/* ── Toolbar ── */
-.toolbar{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:16px;}
-.chips{display:flex;gap:6px;flex-wrap:wrap;}
-.chip{font-size:12px;padding:4px 12px;border-radius:20px;border:1px solid var(--border-hi);background:transparent;color:var(--t2);cursor:pointer;transition:all .12s;}
-.chip:hover{border-color:var(--blue);color:var(--t1);}
-.chip.active{background:var(--blue-bg);color:var(--blue);border-color:var(--blue);}
+<h2>Timeline</h2>
+<div class="panel"><div class="scroll"><svg id="gantt" role="img" aria-label="Timeline of each account"></svg></div>
+<div class="leg"><span><i style="background:var(--eval)"></i>Eval</span><span><i style="background:var(--build)"></i>Funded, building to the minimum</span><span><i style="background:var(--build);opacity:.4"></i>Waiting for the first full Mon-Fri week</span><span><i style="background:var(--pay)"></i>Weekly payouts</span></div></div>
 
-/* ── Buttons ── */
-.btn{border:none;border-radius:var(--r);font-size:13px;font-weight:500;padding:8px 16px;cursor:pointer;font-family:var(--sans);transition:all .12s;white-space:nowrap;}
-.btn-primary{background:var(--blue);color:#fff;}
-.btn-primary:hover{opacity:.88;}
-.btn-ghost{background:transparent;color:var(--t1);border:1px solid var(--border-hi);}
-.btn-ghost:hover{border-color:var(--blue);color:var(--blue);}
-.btn-danger{background:transparent;color:var(--red);border:1px solid var(--red-bg);}
-.btn-danger:hover{background:var(--red-bg);}
-.btn-green{background:var(--green-bg);color:var(--green);border:1px solid var(--green-dim);}
-.btn-green:hover{background:var(--green);color:#fff;}
-.btn-sm{font-size:11px;padding:4px 10px;}
+<h2>Payouts vs debt</h2>
+<div class="panel"><div class="scroll"><svg id="chart" role="img" aria-label="Projected cumulative payouts against the remaining debt"></svg></div></div>
 
-/* ── Account cards ── */
-.accounts-grid{display:flex;flex-direction:column;gap:10px;}
-.acct-card{background:var(--s1);border:1px solid var(--border);border-radius:var(--rl);overflow:hidden;transition:border-color .12s;}
-.acct-card:hover{border-color:var(--border-hi);}
-.acct-card.eval-card{border-left:3px solid var(--amber);}
-.acct-card.funded-card{border-left:3px solid var(--green);}
+<h2>Weekly payouts (projected)</h2>
+<div class="panel scroll"><table id="wk"></table></div>
 
-.acct-top{display:grid;grid-template-columns:140px 1fr auto auto auto auto auto;align-items:center;gap:12px;padding:14px 16px;cursor:pointer;}
-.acct-firm{font-size:11px;color:var(--t3);font-weight:500;text-transform:uppercase;letter-spacing:.05em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-.acct-id{font-family:var(--mono);font-size:12px;color:var(--t2);white-space:nowrap;}
-.acct-bal{font-family:var(--mono);font-size:14px;font-weight:500;text-align:right;white-space:nowrap;}
-.acct-pnl{font-family:var(--mono);font-size:13px;font-weight:500;text-align:right;white-space:nowrap;}
-.acct-pct{font-size:12px;font-family:var(--mono);text-align:right;white-space:nowrap;}
-.acct-prog-wrap{min-width:100px;}
-.acct-prog-bg{height:5px;background:var(--border);border-radius:3px;overflow:hidden;}
-.acct-prog-fill{height:100%;border-radius:3px;transition:width .4s;}
-.acct-prog-fill.amber{background:var(--amber);}
-.acct-prog-fill.green{background:var(--green);}
-.acct-prog-fill.blue{background:var(--blue);}
-.acct-prog-txt{font-size:10px;color:var(--t3);margin-top:2px;text-align:right;}
-.badge{display:inline-flex;align-items:center;font-size:11px;padding:2px 8px;border-radius:20px;font-weight:500;white-space:nowrap;}
-.badge-eval{background:var(--amber-bg);color:var(--amber);}
-.badge-funded{background:var(--green-bg);color:var(--green);}
-.badge-done{background:var(--blue-bg);color:var(--blue);}
+<h2>Logged days</h2>
+<div class="panel scroll"><table id="log"></table></div>
 
-/* ── Account expand panel ── */
-.acct-body{display:none;border-top:1px solid var(--border);padding:16px;background:var(--s2);}
-.acct-body.open{display:block;}
-.acct-body-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:12px;margin-bottom:16px;}
-.field{display:flex;flex-direction:column;gap:5px;}
-.field label{font-size:10px;color:var(--t3);text-transform:uppercase;letter-spacing:.05em;}
-.field input,.field select{background:var(--bg);border:1px solid var(--border-hi);border-radius:var(--r);color:var(--t1);font-size:13px;font-family:var(--sans);padding:7px 10px;outline:none;transition:border-color .12s;width:100%;}
-.field input:focus,.field select:focus{border-color:var(--blue);}
-.field input.mono-input{font-family:var(--mono);}
-.acct-body-actions{display:flex;gap:8px;align-items:center;flex-wrap:wrap;}
-.acct-save-fb{font-size:12px;color:var(--green);}
-
-/* projection row */
-.proj-row{display:flex;align-items:center;gap:10px;padding:10px 14px;background:var(--bg);border:1px solid var(--border);border-radius:var(--r);margin-bottom:14px;flex-wrap:wrap;}
-.proj-row label{font-size:12px;color:var(--t2);white-space:nowrap;}
-.proj-row input{width:90px;background:var(--s2);border:1px solid var(--border-hi);border-radius:var(--r);color:var(--t1);font-size:13px;font-family:var(--mono);padding:6px 8px;outline:none;transition:border-color .12s;}
-.proj-row input:focus{border-color:var(--blue);}
-.proj-result{font-size:12px;color:var(--t3);}
-.proj-result span{color:var(--amber);font-family:var(--mono);font-weight:500;}
-
-/* ── Add account modal ── */
-.overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:100;align-items:center;justify-content:center;}
-.overlay.open{display:flex;}
-.modal{background:var(--s1);border:1px solid var(--border-hi);border-radius:var(--rl);padding:28px;width:520px;max-width:94vw;max-height:90vh;overflow-y:auto;}
-.modal h2{font-size:17px;font-weight:600;margin-bottom:6px;}
-.modal .modal-sub{font-size:12px;color:var(--t3);margin-bottom:22px;}
-.modal-fields{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:22px;}
-.modal-field{display:flex;flex-direction:column;gap:6px;}
-.modal-field label{font-size:11px;color:var(--t3);text-transform:uppercase;letter-spacing:.05em;}
-.modal-field input,.modal-field select{background:var(--s2);border:1px solid var(--border-hi);border-radius:var(--r);color:var(--t1);font-size:13px;font-family:var(--sans);padding:8px 10px;outline:none;transition:border-color .12s;width:100%;}
-.modal-field input:focus,.modal-field select:focus{border-color:var(--blue);}
-.modal-field.full{grid-column:1/-1;}
-.modal-section{font-size:11px;color:var(--t3);text-transform:uppercase;letter-spacing:.05em;margin-bottom:10px;margin-top:4px;padding-top:14px;border-top:1px solid var(--border);grid-column:1/-1;}
-.modal-actions{display:flex;gap:10px;justify-content:flex-end;}
-.modal-err{font-size:12px;color:var(--red);margin-right:auto;}
-
-/* ── Global projection banner ── */
-.global-proj{background:var(--s1);border:1px solid var(--border);border-radius:var(--r);padding:12px 16px;margin-bottom:16px;display:flex;align-items:center;gap:12px;flex-wrap:wrap;}
-.global-proj label{font-size:13px;color:var(--t2);white-space:nowrap;}
-.global-proj input{width:90px;background:var(--s2);border:1px solid var(--border-hi);border-radius:var(--r);color:var(--t1);font-size:14px;font-family:var(--mono);padding:6px 10px;outline:none;transition:border-color .12s;}
-.global-proj input:focus{border-color:var(--blue);}
-.global-proj .gp-hint{font-size:12px;color:var(--t3);}
-.global-proj .btn{margin-left:auto;}
-
-/* ── Empty state ── */
-.empty{text-align:center;padding:60px 20px;color:var(--t3);font-size:13px;border:1px dashed var(--border);border-radius:var(--rl);}
-.empty .empty-icon{font-size:32px;margin-bottom:12px;opacity:.4;}
-.empty p{margin-bottom:16px;}
-
-/* ── Payout UI ── */
-.ready-pill{display:inline-flex;align-items:center;gap:4px;font-size:10px;padding:2px 8px;border-radius:20px;background:var(--green-bg);color:var(--green);font-weight:600;margin-left:6px;white-space:nowrap;}
-.payout-box{background:var(--bg);border:1px solid var(--border);border-radius:var(--r);padding:14px;margin-bottom:14px;}
-.payout-box.ready-box{border-color:var(--green-dim);background:var(--green-bg);}
-.payout-box h4{font-size:12px;font-weight:500;color:var(--t2);margin-bottom:10px;text-transform:uppercase;letter-spacing:.05em;}
-.payout-form{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-bottom:10px;}
-.payout-form .field label{font-size:10px;}
-.payout-history{margin-top:10px;}
-.payout-hist-row{display:grid;grid-template-columns:90px 1fr 1fr 1fr;gap:8px;padding:7px 0;border-bottom:1px solid var(--border);font-size:12px;align-items:center;}
-.payout-hist-row:last-child{border-bottom:none;}
-.payout-hist-row .ph-date{color:var(--t3);font-family:var(--mono);font-size:11px;}
-.payout-hist-row .ph-amt{color:var(--green);font-family:var(--mono);font-weight:500;text-align:right;}
-.payout-hist-row .ph-split{color:var(--t3);font-family:var(--mono);font-size:11px;text-align:right;}
-.payout-hist-row .ph-del{text-align:right;}
-.payout-hist-row .ph-del button{background:transparent;border:none;color:var(--t3);cursor:pointer;font-size:12px;padding:2px 6px;border-radius:4px;}
-.payout-hist-row .ph-del button:hover{color:var(--red);background:var(--red-bg);}
-.payout-total-line{display:flex;justify-content:space-between;font-size:12px;padding-top:8px;margin-top:4px;border-top:1px solid var(--border-hi);}
-.payout-total-line span:last-child{font-family:var(--mono);font-weight:500;color:var(--green);}
-
-/* Summary page payout section */
-.payout-summary-card{background:var(--s1);border:1px solid var(--border);border-radius:var(--rl);padding:16px;}
-.payout-summary-card h3{font-size:12px;color:var(--t3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:12px;}
-.ps-row{display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--border);font-size:13px;}
-.ps-row:last-child{border-bottom:none;}
-.ps-row .ps-val{font-family:var(--mono);font-weight:500;}
-.month-bar-row{display:flex;align-items:center;gap:10px;padding:6px 0;font-size:12px;}
-.month-bar-row .mb-label{width:80px;color:var(--t3);font-family:var(--mono);white-space:nowrap;}
-.month-bar-row .mb-bg{flex:1;height:16px;background:var(--border);border-radius:4px;overflow:hidden;}
-.month-bar-row .mb-fill{height:100%;background:var(--green);border-radius:4px;transition:width .4s;}
-.month-bar-row .mb-val{width:90px;text-align:right;font-family:var(--mono);color:var(--green);font-weight:500;}
-
-/* ── Scrollbar ── */
-::-webkit-scrollbar{width:5px;height:5px;}
-::-webkit-scrollbar-track{background:transparent;}
-::-webkit-scrollbar-thumb{background:var(--border-hi);border-radius:3px;}
-
-@media(max-width:900px){
-  .acct-top{grid-template-columns:1fr auto auto auto;}
-  .acct-firm,.acct-pnl,.acct-prog-wrap{display:none;}
-}
-@media(max-width:640px){
-  .sidebar{width:56px;min-width:56px;}
-  .logo,.nav-lbl,.nav-btn span:not(.nav-icon),.sidebar-footer{display:none;}
-  .main{margin-left:56px;padding:16px;}
-  .nav-btn{justify-content:center;}
-  .modal-fields{grid-template-columns:1fr;}
-  .modal-field.full{grid-column:1;}
-}
-</style>
-</head>
-<body>
-<div class="shell">
-
-<!-- SIDEBAR -->
-<nav class="sidebar">
-  <div class="logo">
-    <div class="logo-main">Prop Tracker</div>
-    <div class="logo-sub">MES · Failed Breakdown</div>
-  </div>
-  <div class="nav-section">
-    <div class="nav-lbl">Pages</div>
-    <button class="nav-btn active" data-page="accounts"><span class="nav-icon">⊞</span><span>Accounts</span></button>
-    <button class="nav-btn" data-page="summary"><span class="nav-icon">◈</span><span>Summary</span></button>
-    <button class="nav-btn" data-page="payouts"><span class="nav-icon">↑</span><span>Payouts</span></button>
-  </div>
-  <div class="sidebar-footer" id="sidebar-footer">0 accounts</div>
-</nav>
-
-<!-- MAIN -->
-<main class="main">
-
-  <!-- ACCOUNTS PAGE -->
-  <div class="page active" id="page-accounts">
-    <div class="page-header">
-      <h1>Accounts</h1>
-      <p>Add, manage, and track all your prop firm accounts</p>
-    </div>
-
-    <!-- KPI strip -->
-    <div class="kpi-strip" id="kpi-strip"></div>
-
-    <!-- Global projection -->
-    <div class="global-proj">
-      <label>Apply daily projection to all accounts ($)</label>
-      <input type="number" id="global-proj-val" placeholder="e.g. 100" step="0.25" min="0.01"/>
-      <span class="gp-hint">Sets the daily P&amp;L projection for every account at once</span>
-      <button class="btn btn-ghost" id="apply-global-proj">→ Apply to all</button>
-    </div>
-
-    <!-- Toolbar: filters + add button -->
-    <div class="toolbar">
-      <div class="chips" id="firm-chips"></div>
-      <div class="chips" style="margin-left:8px;" id="phase-chips">
-        <button class="chip active" data-phase="all">All phases</button>
-        <button class="chip" data-phase="eval">Eval</button>
-        <button class="chip" data-phase="funded">Funded</button>
-      </div>
-      <button class="btn btn-primary" id="add-acct-btn" style="margin-left:auto;">+ Add account</button>
-    </div>
-
-    <!-- Account list -->
-    <div class="accounts-grid" id="accounts-grid"></div>
-  </div>
-
-  <!-- SUMMARY PAGE -->
-  <div class="page" id="page-summary">
-    <div class="page-header">
-      <h1>Summary</h1>
-      <p>Overview across all accounts and firms</p>
-    </div>
-    <div class="kpi-strip" id="sum-kpi-strip"></div>
-    <div id="sum-by-firm"></div>
-  </div>
-
-  <!-- PAYOUTS PAGE -->
-  <div class="page" id="page-payouts">
-    <div class="page-header">
-      <h1>Payouts</h1>
-      <p>Track realized income across all prop firms</p>
-    </div>
-    <div class="kpi-strip" id="payout-kpi-strip"></div>
-    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:16px;margin-bottom:24px;">
-      <div class="payout-summary-card">
-        <h3>Payouts by firm</h3>
-        <div id="payout-by-firm"></div>
-      </div>
-      <div class="payout-summary-card">
-        <h3>Payouts by month</h3>
-        <div id="payout-by-month"></div>
-      </div>
-    </div>
-    <div class="payout-summary-card">
-      <h3>Pending — accounts ready to withdraw now</h3>
-      <div id="payout-pending"></div>
-    </div>
-    <div class="payout-summary-card" style="margin-top:16px;">
-      <h3>All payout history</h3>
-      <div id="payout-all-history"></div>
-    </div>
-  </div>
-
+<p class="note">How it works: balances start from your Oct 13 screenshot. Each logged gain or loss moves that account's balance. Days up to your last logged day with no entry count as $0; days after it use the daily goals. An eval is passed when its balance reaches the target; the funded account then restarts at $0 profit. Minimums: Lucid $1,000 profit; Tradeify $1,500 profit (a $26,500 balance from $25,000); the 100K account is assumed $1,000. Each account keeps that amount as its floor, withdraws on Fridays after its first full Mon-Fri week at the higher goal, and pays 90%. Log only trading results, not withdrawals. Lower Debt remaining when you pay some of the debt from other income; leave it alone for trading payouts, which the projection already counts. Data is saved to your account when available, otherwise in this browser. Market holidays push dates out a few days.</p>
 </main>
-</div>
-
-<!-- ADD ACCOUNT MODAL -->
-<div class="overlay" id="add-modal">
-  <div class="modal">
-    <h2 id="modal-title">Add account</h2>
-    <div class="modal-sub">Fill in the account details. You can edit everything later by expanding the account card.</div>
-    <div class="modal-fields" id="modal-fields">
-      <div class="modal-field full">
-        <label>Prop firm name</label>
-        <input type="text" id="m-firm" placeholder="e.g. TakeProfit, Tradeify, Blusky…" list="firm-suggestions"/>
-        <datalist id="firm-suggestions"></datalist>
-      </div>
-      <div class="modal-field full">
-        <label>Account ID</label>
-        <input type="text" id="m-id" placeholder="e.g. TAKEPROFITPRO123456"/>
-      </div>
-      <div class="modal-field">
-        <label>Phase</label>
-        <select id="m-phase">
-          <option value="eval">Eval</option>
-          <option value="funded">Funded</option>
-        </select>
-      </div>
-      <div class="modal-field">
-        <label>Starting balance ($)</label>
-        <input type="number" id="m-start" placeholder="e.g. 25000" step="0.01"/>
-      </div>
-      <div class="modal-field">
-        <label>Current balance ($)</label>
-        <input type="number" id="m-balance" placeholder="Same as start if new" step="0.01"/>
-      </div>
-      <div class="modal-field">
-        <label id="m-target-label">Eval target ($)</label>
-        <input type="number" id="m-target" placeholder="e.g. 26500" step="0.01"/>
-      </div>
-
-      <!-- Funded-only fields -->
-      <div class="modal-section" id="funded-section" style="display:none">Funded account rules</div>
-      <div class="modal-field" id="f-floor-wrap" style="display:none">
-        <label>Floor (locked drawdown) ($)</label>
-        <input type="number" id="m-floor" placeholder="e.g. 26500" step="0.01"/>
-      </div>
-      <div class="modal-field" id="f-wdtrigger-wrap" style="display:none">
-        <label>Withdrawal trigger ($)</label>
-        <input type="number" id="m-wdtrigger" placeholder="e.g. 27700" step="0.01"/>
-      </div>
-      <div class="modal-field" id="f-wdafter-wrap" style="display:none">
-        <label>Balance after withdrawal ($)</label>
-        <input type="number" id="m-wdafter" placeholder="e.g. 26700" step="0.01"/>
-      </div>
-      <div class="modal-field" id="f-split-wrap" style="display:none">
-        <label>Profit split (your %)</label>
-        <select id="m-split">
-          <option value="100">100%</option>
-          <option value="90">90%</option>
-          <option value="80" selected>80%</option>
-          <option value="70">70%</option>
-          <option value="50">50%</option>
-        </select>
-      </div>
-    </div>
-    <div class="modal-actions">
-      <span class="modal-err" id="modal-err"></span>
-      <button class="btn btn-ghost" id="modal-cancel">Cancel</button>
-      <button class="btn btn-primary" id="modal-save">Add account</button>
-    </div>
-  </div>
-</div>
-
 <script>
-// ─── Storage ──────────────────────────────────────────────────────────────────
-const STORE_KEY = 'prop_tracker_v1';
-function load() { try { return JSON.parse(localStorage.getItem(STORE_KEY) || '[]'); } catch { return []; } }
-function save() { localStorage.setItem(STORE_KEY, JSON.stringify(accounts)); }
-
-// ─── State ────────────────────────────────────────────────────────────────────
-let accounts     = load(); // array of account objects
-let filterFirm   = 'all';
-let filterPhase  = 'all';
-let expandedId   = null;
-let editingId    = null;   // null = adding new, string = editing existing
-
-// ─── Account schema ───────────────────────────────────────────────────────────
-// {
-//   id: string (unique key),
-//   firm: string,
-//   phase: 'eval' | 'funded',
-//   start: number,
-//   balance: number,
-//   target: number,           // eval target OR funded profit target (withdrawal trigger)
-//   floor: number|null,       // funded only
-//   wdafter: number|null,     // funded only - balance after withdrawal
-//   dailyProj: number|null,   // per-account daily projection
-// }
-
-// ─── Helpers ──────────────────────────────────────────────────────────────────
-const fmt  = n => '$' + (+n).toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2});
-const fmtS = n => (n >= 0 ? '+' : '') + fmt(n);
-const uid  = () => Date.now().toString(36) + Math.random().toString(36).slice(2,6);
-
-function getPnl(a)  { return a.balance - a.start; }
-function getPct(a)  {
-  if (a.phase === 'eval') {
-    const needed = a.target - a.start;
-    if (needed <= 0) return 100;
-    return Math.min(100, Math.max(0, ((a.balance - a.start) / needed) * 100));
-  } else {
-    // funded: progress toward withdrawal trigger from start
-    const needed = a.target - a.start;
-    if (needed <= 0) return 100;
-    return Math.min(100, Math.max(0, ((a.balance - a.start) / needed) * 100));
-  }
+const DEBT=33000;
+const AC=[
+["L0053","Lucid …0053","Lucid",25196,26250,1000,25000],
+["L0054","Lucid …0054","Lucid",25196,26250,1000,25000],
+["L0055","Lucid …0055","Lucid",25196,26250,1000,25000],
+["L0056","Lucid …0056","Lucid",25195,26250,1000,25000],
+["L0057","Lucid …0057","Lucid",25196,26250,1000,25000],
+["T6651","Tradeify …6651","Tradeify",25682.01,26500,1500,25000],
+["T4577","Tradeify …4577","Tradeify",24986.30,26500,1500,25000],
+["T5392","Tradeify …5392","Tradeify",25036.65,26500,1500,25000],
+["T1427","Tradeify …1427","Tradeify",25886.04,26500,1500,25000],
+["T1738","Tradeify …1738 (new eval)","Tradeify",25146.20,26500,1500,25000],
+["S100","Static 100K (funded)","Static",100000,0,1000,100000,1,1]
+].map(([id,n,f,start,target,u,fb,fd,fx])=>({id,n,f,start,target,u,fb,fd:!!fd,fx:!!fx,share:.9}));
+const dates=[new Date(Date.UTC(2026,9,13))];{let x=Date.UTC(2026,9,14);while(dates.length<420){const g=new Date(x),w=g.getUTCDay();if(w&&w<6)dates.push(g);x+=864e5}}
+const ks=dates.map(g=>g.toISOString().slice(0,10)),idx={};ks.forEach((k,i)=>idx[k]=i);
+const S={log:{},debt:DEBT,t:60,t2:100};
+function sim(S,useLog){
+ const li={};let last=0;
+ if(useLog)for(const k in S.log){const i=idx[k];if(i>0){li[i]=S.log[k];last=Math.max(last,i)}}
+ const need=Math.max(0,S.debt);
+ const st=AC.map(a=>({a,ph:a.fd?'f':'e',bal:a.start,fp:0,fpg:0,gross:0,unl:false,E:a.fd?0:null,R:null,W:null}));
+ const cp=s=>({ph:s.ph,bal:s.bal,fp:s.fp,fpg:s.fpg,unl:s.unl});
+ let snaps=st.map(cp),rows=[],prev=0,done=need<=0?0:null;
+ for(let d=1;d<400&&done!==0;d++){
+  for(const s of st){const a=s.a,g=li[d];
+   const pnl=d<=last?(g&&g[a.id]!==undefined?+g[a.id]:0):(s.unl&&!a.fx?S.t2:S.t);
+   if(s.ph==='e'){s.bal+=pnl;if(s.bal>=a.target){s.ph='f';s.E=d}}
+   else{s.fp+=pnl;s.fpg+=pnl;if(!s.unl&&s.fp>=a.u){s.unl=true;s.R=d;let m=d+1;while(dates[m].getUTCDay()!==1)m++;s.W=m+4}}}
+  if(d===last)snaps=st.map(cp);
+  if(dates[d].getUTCDay()===5){
+   for(const s of st)if(s.unl&&d>=s.W){const w=Math.max(0,s.fp-s.a.u);s.fp-=w;s.gross+=w}
+   const cum=st.reduce((q,s)=>q+s.a.share*s.gross,0);rows.push({d,net:cum-prev,cum});prev=cum;
+   if(cum>=need){done=d;break}}
+ }
+ return{st,rows,done,last,snaps,need};
 }
-function getRemaining(a) {
-  return Math.max(0, a.target - a.balance);
+//UI
+const $=s=>document.querySelector(s),fmt=n=>(n<0?'-$':'$')+Math.abs(Math.round(n)).toLocaleString('en-US'),fm2=n=>(n<0?'-$':'$')+Math.abs(n).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
+const dtS=g=>g.toLocaleDateString('en-US',{month:'short',day:'numeric',timeZone:'UTC'}),dtF=g=>g.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric',year:'numeric',timeZone:'UTC'});
+let M=null,store=null;
+function ticks(H,x,y1,y2){let s='';for(let d=1;d<=H;d++)if(d==1||dates[d].getUTCMonth()!==dates[d-1].getUTCMonth()){s+=`<line x1="${x(d)}" x2="${x(d)}" y1="${y1}" y2="${y2}" stroke="var(--line)"/><text x="${x(d)+4}" y="${y1+12}">${dates[d].toLocaleDateString('en-US',{month:'short',timeZone:'UTC'})}</text>`}return s}
+function render(){
+ const m=M=sim(S,true),b=sim({log:{},debt:S.debt,t:S.t,t2:S.t2},false),H=Math.max(m.done||60,10);
+ $('#tv').textContent=fmt(S.t);$('#tv2').textContent=fmt(S.t2);
+ $('#hero').textContent=m.done===null?'Not cleared within 80 weeks':m.done===0?'Debt paid':'Debt-free by '+dtF(dates[m.done]);
+ const nl=Object.keys(S.log).length,wk=(m.done-b.done)/5;
+ $('#delta').textContent=m.done===null||b.done===null?'':!nl?'No days logged yet. This is the plan from your Oct 13 balances.':wk===0?'Same finish as the plan from your Oct 13 balances.':Math.abs(wk)+(Math.abs(wk)===1?' week ':' weeks ')+(wk>0?'later':'earlier')+' than the plan from your Oct 13 balances ('+dtS(dates[b.done])+').';
+ const tot=Object.values(S.log).reduce((q,r)=>q+Object.values(r).reduce((x,y)=>x+y,0),0);
+ $('#stats').innerHTML=`<div><b>${fmt(m.need)}</b><span class="mut">debt remaining</span></div><div><b>${nl}</b><span class="mut">days logged</span></div><div><b class="${tot<0?'neg':'pos'}">${fmt(tot)}</b><span class="mut">logged P&amp;L, all accounts</span></div><div><b>${fmt(AC.reduce((q,a)=>q+a.share*(a.fx?S.t:S.t2)*5,0))}/week</b><span class="mut">steady payout once all are active</span></div>`;
+ // cards
+ $('#accts').innerHTML=m.st.map((s,j)=>{const a=s.a,sn=m.snaps[j];let lg=0;for(const k in S.log)lg+=S.log[k][a.id]||0;
+  const e=sn.ph==='e',bal=e?sn.bal:a.fb+sn.fpg,pr=e?(sn.bal-a.start)/(a.target-a.start):sn.fp/a.u,cl=e?'':sn.unl?'u':'f',lab=e?'Eval':sn.unl?'Unlocked':'Funded';
+  const t1=e?`Needs ${fm2(Math.max(0,a.target-sn.bal))} to reach ${fmt(a.target)}`:sn.unl?`Floor ${fmt(a.u)} kept, withdrawing weekly`:`Needs ${fm2(Math.max(0,a.u-sn.fp))} more profit to unlock`;
+  const t2=[e&&s.E?'Passes '+dtS(dates[s.E]):'',!sn.unl&&s.R?'unlocks '+dtS(dates[s.R]):'',s.W?'first payout '+dtS(dates[s.W]):''].filter(Boolean).join(', ');
+  return `<div class="card"><h3>${a.n}<span class="chip ${cl}">${lab}</span></h3><div class="big">${fm2(bal)}</div><div class="bar"><i style="width:${Math.max(0,Math.min(1,pr))*100}%"></i></div>${t1}<br><span class="mut">${t2||'-'}${t2?' (projected)':''}</span><br><span class="mut">Logged: <span class="${lg<0?'neg':'pos'}">${lg?fm2(lg):'$0.00'}</span></span></div>`}).join('');
+ // gantt
+ const L=150,W=920,R=14,rh=28,top=30,h=top+rh*AC.length+8,x=d=>L+(W-L-R)*d/H;let g=ticks(H,x,4,h-4);
+ m.st.forEach((s,i)=>{const y=top+i*rh+4,E=Math.min(s.E??H,H),r=Math.min(s.R??H,H),w=Math.min(s.W??H,H);
+  g+=`<text x="0" y="${y+13}">${s.a.n.replace(' (new eval)','').replace(' (funded)','')}</text>`;
+  if(E>0)g+=`<rect x="${x(0)}" y="${y}" width="${x(E)-x(0)}" height="18" rx="3" fill="var(--eval)"/><text class="bt" x="${x(E)-6}" y="${y+13}" text-anchor="end">${dtS(dates[E])}</text>`;
+  g+=`<rect x="${x(E)}" y="${y}" width="${Math.max(0,x(r)-x(E))}" height="18" fill="var(--build)"/><rect x="${x(r)}" y="${y}" width="${Math.max(0,x(w)-x(r))}" height="18" fill="var(--build)" opacity=".4"/>`;
+  if(w<H)g+=`<rect x="${x(w)}" y="${y}" width="${x(H)-x(w)}" height="18" rx="3" fill="var(--pay)"/><text class="bt" x="${x(w)+6}" y="${y+13}">first payout ${dtS(dates[w])}</text>`});
+ if(m.last>0)g+=`<line x1="${x(m.last)}" x2="${x(m.last)}" y1="${top-6}" y2="${h-4}" stroke="var(--ink)" stroke-dasharray="3 3"/><text x="${x(m.last)+4}" y="${h-8}">last logged day</text>`;
+ if(m.done)g+=`<line x1="${x(H)}" x2="${x(H)}" y1="${top-8}" y2="${h-4}" stroke="var(--debt)" stroke-width="2"/><text x="${x(H)-6}" y="${top-12}" text-anchor="end" style="fill:var(--debt);font-weight:700">Debt paid ${dtS(dates[H])}</text>`;
+ $('#gantt').setAttribute('viewBox',`0 0 ${W} ${h}`);$('#gantt').innerHTML=g;
+ // chart
+ const CH=250,cl=58,cb=26,ct=26,lastc=m.rows.length?m.rows[m.rows.length-1].cum:0,mx=Math.max(m.need,lastc,1)*1.04,cx=d=>cl+(W-cl-R)*d/H,cy=v=>CH-cb-(CH-cb-ct)*v/mx;
+ let c=ticks(H,cx,ct-6,CH-cb);const step=m.need>20000?10000:m.need>8000?5000:2000;
+ for(let v=0;v<=m.need;v+=step)c+=`<line x1="${cl}" x2="${W-R}" y1="${cy(v)}" y2="${cy(v)}" stroke="var(--line)" stroke-dasharray="2 4"/><text x="${cl-6}" y="${cy(v)+4}" text-anchor="end">${fmt(v)}</text>`;
+ const ln=[[0,0],...m.rows.map(q=>[q.d,q.cum])].map(p=>cx(p[0])+','+cy(p[1])).join(' ');
+ c+=`<polygon points="${cx(0)},${cy(0)} ${ln} ${cx(H)},${cy(0)}" fill="var(--pay)" opacity=".18"/><polyline points="${ln}" fill="none" stroke="var(--pay)" stroke-width="2.5"/><line x1="${cl}" x2="${W-R}" y1="${cy(m.need)}" y2="${cy(m.need)}" stroke="var(--debt)" stroke-width="1.5" stroke-dasharray="6 4"/><text x="${cl+6}" y="${cy(m.need)-6}" style="fill:var(--debt);font-weight:700">Remaining debt ${fmt(m.need)}</text>`;
+ $('#chart').setAttribute('viewBox',`0 0 ${W} ${CH}`);$('#chart').innerHTML=c;
+ // weekly table
+ $('#wk').innerHTML='<tr><th>Friday</th><th>Week\'s net</th><th>Cumulative net</th><th>Still owed</th></tr>'+m.rows.filter(q=>q.net>.5||q.cum>0).map(q=>`<tr><td>${dtF(dates[q.d])}</td><td>${fmt(q.net)}</td><td>${fmt(q.cum)}</td><td>${fmt(Math.max(0,m.need-q.cum))}</td></tr>`).join('');
+ // log table
+ const ds=Object.keys(S.log).sort().reverse();
+ $('#log').innerHTML=ds.length?'<tr><th>Date</th><th>Accounts</th><th>Total P&amp;L</th><th></th></tr>'+ds.map(k=>{const r=S.log[k],v=Object.values(r).reduce((q,y)=>q+y,0);return `<tr><td>${dtF(new Date(k+'T00:00:00Z'))}</td><td>${Object.keys(r).length}</td><td class="${v<0?'neg':'pos'}">${fm2(v)}</td><td><button data-e="${k}">Edit</button> <button data-d="${k}">Delete</button></td></tr>`}).join(''):'<tr><td>Nothing logged yet.</td></tr>';
 }
-function getDays(a) {
-  if (!a.dailyProj || a.dailyProj <= 0) return null;
-  const rem = getRemaining(a);
-  if (rem <= 0) return 0;
-  return Math.ceil(rem / a.dailyProj);
-}
-function getColor(a) {
-  const pct = getPct(a);
-  if (pct >= 100) return 'green';
-  return a.phase === 'eval' ? 'amber' : 'blue';
-}
-function getFirms() {
-  return [...new Set(accounts.map(a => a.firm))].sort();
-}
-
-// ─── Firm chips ───────────────────────────────────────────────────────────────
-function renderFirmChips() {
-  const firms  = getFirms();
-  const chips  = document.getElementById('firm-chips');
-  chips.innerHTML = `<button class="chip ${filterFirm==='all'?'active':''}" data-firm="all">All firms</button>`
-    + firms.map(f => `<button class="chip ${filterFirm===f?'active':''}" data-firm="${f}">${f}</button>`).join('');
-}
-
-// ─── KPIs ─────────────────────────────────────────────────────────────────────
-function renderKPIs() {
-  const all      = accounts;
-  const evalAcc  = all.filter(a => a.phase === 'eval');
-  const fundAcc  = all.filter(a => a.phase === 'funded');
-  const totalPnl = all.reduce((s,a) => s + getPnl(a), 0);
-  const readyWd  = fundAcc.filter(a => a.balance >= a.target).length;
-
-  document.getElementById('kpi-strip').innerHTML = `
-    <div class="kpi"><div class="kl">Total accounts</div><div class="kv">${all.length}</div><div class="ks">across ${getFirms().length} firm${getFirms().length!==1?'s':''}</div></div>
-    <div class="kpi"><div class="kl">In eval</div><div class="kv amber">${evalAcc.length}</div><div class="ks">working toward target</div></div>
-    <div class="kpi"><div class="kl">Funded</div><div class="kv green">${fundAcc.length}</div><div class="ks">drawdown locked</div></div>
-    <div class="kpi"><div class="kl">Total P&amp;L</div><div class="kv ${totalPnl>=0?'green':'red'}">${fmtS(totalPnl)}</div><div class="ks">all accounts</div></div>
-    <div class="kpi"><div class="kl">Ready to withdraw</div><div class="kv ${readyWd>0?'green':'blue'}">${readyWd}</div><div class="ks">at trigger balance</div></div>
-  `;
-
-  // Sidebar footer
-  document.getElementById('sidebar-footer').innerHTML =
-    `${all.length} account${all.length!==1?'s':''}<br>${getFirms().length} firm${getFirms().length!==1?'s':''}`;
-}
-
-// ─── Accounts grid ────────────────────────────────────────────────────────────
-function renderAccounts() {
-  renderFirmChips();
-  renderKPIs();
-
-  let list = accounts;
-  if (filterFirm  !== 'all') list = list.filter(a => a.firm  === filterFirm);
-  if (filterPhase !== 'all') list = list.filter(a => a.phase === filterPhase);
-
-  const grid = document.getElementById('accounts-grid');
-
-  if (!accounts.length) {
-    grid.innerHTML = `<div class="empty">
-      <div class="empty-icon">📋</div>
-      <p>No accounts yet. Add your first account to get started.</p>
-      <button class="btn btn-primary" onclick="openAddModal()">+ Add account</button>
-    </div>`;
-    return;
-  }
-
-  if (!list.length) {
-    grid.innerHTML = `<div class="empty"><div class="empty-icon">🔍</div><p>No accounts match the current filters.</p></div>`;
-    return;
-  }
-
-  grid.innerHTML = list.map(a => {
-    const pnl     = getPnl(a);
-    const pct     = getPct(a);
-    const rem     = getRemaining(a);
-    const days    = getDays(a);
-    const color   = getColor(a);
-    const isOpen  = expandedId === a.id;
-    const done    = pct >= 100;
-    const badge   = a.phase === 'eval'
-      ? `<span class="badge badge-eval">Eval</span>`
-      : done
-        ? `<span class="badge badge-done">↑ Withdraw</span>`
-        : `<span class="badge badge-funded">Funded</span>`;
-    const progTxt = done
-      ? '✓ Target reached'
-      : `${pct.toFixed(1)}%${days !== null ? ' · ~'+days+'d' : ''}`;
-
-    const bodyClass = isOpen ? 'acct-body open' : 'acct-body';
-
-    return `
-    <div class="acct-card ${a.phase}-card" id="card-${a.id}">
-      <div class="acct-top" data-action="toggle" data-id="${a.id}">
-        <div>
-          <div class="acct-firm">${a.firm}</div>
-          <div class="acct-id">${a.id}</div>
-        </div>
-        <div class="acct-bal">${fmt(a.balance)}</div>
-        <div class="acct-pnl ${pnl>=0?'green':'red'}">${fmtS(pnl)}</div>
-        <div>${badge}</div>
-        <div class="acct-pct ${color}">${pct.toFixed(1)}%</div>
-        <div class="acct-prog-wrap">
-          <div class="acct-prog-bg"><div class="acct-prog-fill ${color}" style="width:${pct.toFixed(1)}%"></div></div>
-          <div class="acct-prog-txt">${progTxt}</div>
-        </div>
-        <div style="color:var(--t3);font-size:16px;padding-left:4px;">${isOpen?'▾':'▸'}</div>
-      </div>
-      <div class="${bodyClass}" id="body-${a.id}">
-        ${renderCardBody(a)}
-      </div>
-    </div>`;
-  }).join('');
-}
-
-function renderCardBody(a) {
-  const rem  = getRemaining(a);
-  const days = getDays(a);
-  const pct  = getPct(a);
-  const done = pct >= 100;
-
-  const projResult = a.dailyProj > 0
-    ? `<span>${days !== null && days > 0 ? '~'+days+' trading days to milestone' : done ? '✓ Milestone reached!' : '—'}</span>`
-    : `<span>—</span>`;
-
-  const fundedFields = a.phase === 'funded' ? `
-    <div class="field">
-      <label>Floor ($)</label>
-      <input class="mono-input" type="number" step="0.01" value="${a.floor||''}" id="e-floor-${a.id}" placeholder="e.g. 26500"/>
-    </div>
-    <div class="field">
-      <label>Withdrawal trigger ($)</label>
-      <input class="mono-input" type="number" step="0.01" value="${a.target||''}" id="e-target-${a.id}" placeholder="e.g. 27700"/>
-    </div>
-    <div class="field">
-      <label>Balance after withdrawal ($)</label>
-      <input class="mono-input" type="number" step="0.01" value="${a.wdafter||''}" id="e-wdafter-${a.id}" placeholder="e.g. 26700"/>
-    </div>
-    <div class="field">
-      <label>Profit split (your %)</label>
-      <select id="e-split-${a.id}">
-        <option value="100" ${a.split==100?'selected':''}>100%</option>
-        <option value="90"  ${a.split==90 ?'selected':''}>90%</option>
-        <option value="80"  ${(!a.split||a.split==80)?'selected':''}>80%</option>
-        <option value="70"  ${a.split==70 ?'selected':''}>70%</option>
-        <option value="50"  ${a.split==50 ?'selected':''}>50%</option>
-      </select>
-    </div>` : `
-    <div class="field">
-      <label>Eval target ($)</label>
-      <input class="mono-input" type="number" step="0.01" value="${a.target||''}" id="e-target-${a.id}" placeholder="e.g. 26500"/>
-    </div>`;
-
-  const isReady = a.phase === 'funded' && a.balance >= a.target;
-  const payouts = a.payouts || [];
-  const payoutTotal = payouts.reduce((s,p) => s + p.amount, 0);
-  const payoutTake  = payouts.reduce((s,p) => s + (p.amount * (p.split||80)/100), 0);
-
-  const payoutSection = a.phase === 'funded' ? `
-    <div class="payout-box ${isReady?'ready-box':''}">
-      <h4>${isReady ? '💰 Ready to withdraw' : 'Log a payout'} ${isReady?`<span class="ready-pill">balance ≥ trigger</span>`:''}</h4>
-      <div style="font-size:11px;color:var(--t3);margin-bottom:10px;">Fill this in, then click <strong style="color:var(--green)">"Log this payout"</strong> below — not "Save account details" (that button is only for editing the fields further down).</div>
-      <div class="payout-form">
-        <div class="field">
-          <label>Payout amount ($)</label>
-          <input type="number" step="0.01" id="po-amt-${a.id}" placeholder="e.g. 1000"/>
-        </div>
-        <div class="field">
-          <label>Date</label>
-          <input type="date" id="po-date-${a.id}" value="${new Date().toISOString().split('T')[0]}"/>
-        </div>
-        <div class="field">
-          <label>Balance after payout ($)</label>
-          <input type="number" step="0.01" id="po-after-${a.id}" placeholder="e.g. 26700"/>
-        </div>
-      </div>
-      <button class="btn btn-green btn-sm" data-action="log-payout" data-id="${a.id}" style="font-weight:600;">✓ Log this payout</button>
-      <span class="acct-save-fb" id="po-fb-${a.id}" style="margin-left:8px;"></span>
-      ${payouts.length ? `
-      <div class="payout-history">
-        ${payouts.slice().reverse().map(p => `
-          <div class="payout-hist-row">
-            <div class="ph-date">${p.date}</div>
-            <div class="ph-amt">${fmt(p.amount)}</div>
-            <div class="ph-split">${p.split||80}% → you keep ${fmt(p.amount*(p.split||80)/100)}</div>
-            <div class="ph-del"><button data-action="delete-payout" data-id="${a.id}" data-payout-id="${p.id}">✕</button></div>
-          </div>`).join('')}
-        <div class="payout-total-line"><span>Total paid out (this account)</span><span>${fmt(payoutTotal)}</span></div>
-        <div class="payout-total-line"><span>Your take (after split)</span><span>${fmt(payoutTake)}</span></div>
-      </div>` : ''}
-    </div>` : '';
-
-  return `
-    <!-- Projection -->
-    <div class="proj-row">
-      <label>Daily projection ($)</label>
-      <input type="number" step="0.25" min="0.01" value="${a.dailyProj||''}" id="e-proj-${a.id}" placeholder="e.g. 100"/>
-      <div class="proj-result">${projResult}</div>
-    </div>
-
-    <!-- Editable fields -->
-    <div class="acct-body-grid">
-      <div class="field">
-        <label>Prop firm</label>
-        <input type="text" value="${a.firm}" id="e-firm-${a.id}" list="firm-suggestions"/>
-      </div>
-      <div class="field">
-        <label>Account ID</label>
-        <input class="mono-input" type="text" value="${a.id}" id="e-id-${a.id}"/>
-      </div>
-      <div class="field">
-        <label>Phase</label>
-        <select id="e-phase-${a.id}" onchange="onPhaseChange('${a.id}')">
-          <option value="eval"   ${a.phase==='eval'  ?'selected':''}>Eval</option>
-          <option value="funded" ${a.phase==='funded'?'selected':''}>Funded</option>
-        </select>
-      </div>
-      <div class="field">
-        <label>Starting balance ($)</label>
-        <input class="mono-input" type="number" step="0.01" value="${a.start}" id="e-start-${a.id}"/>
-      </div>
-      <div class="field">
-        <label>Current balance ($)</label>
-        <input class="mono-input" type="number" step="0.01" value="${a.balance}" id="e-bal-${a.id}"/>
-      </div>
-      ${fundedFields}
-    </div>
-
-    <!-- Milestone info -->
-    <div style="background:var(--bg);border:1px solid var(--border);border-radius:var(--r);padding:10px 14px;margin-bottom:14px;display:flex;gap:20px;flex-wrap:wrap;font-size:12px;">
-      <div><span style="color:var(--t3)">To milestone: </span><span style="font-family:var(--mono);color:var(--amber);font-weight:500">${getRemaining(a)>0?fmt(getRemaining(a)):'✓ Done'}</span></div>
-      <div><span style="color:var(--t3)">Progress: </span><span style="font-family:var(--mono);font-weight:500;color:var(--${getColor(a)})">${getPct(a).toFixed(2)}%</span></div>
-      ${a.phase==='funded'&&a.floor?`<div><span style="color:var(--t3)">Floor: </span><span style="font-family:var(--mono)">${fmt(a.floor)}</span></div>`:''}
-      ${a.phase==='funded'&&a.wdafter?`<div><span style="color:var(--t3)">After withdrawal: </span><span style="font-family:var(--mono)">${fmt(a.wdafter)}</span></div>`:''}
-      ${a.phase==='funded'&&a.split?`<div><span style="color:var(--t3)">Split: </span><span style="font-family:var(--mono)">${a.split}% you</span></div>`:''}
-    </div>
-
-    ${payoutSection}
-
-    <!-- Actions -->
-    <div class="acct-body-actions">
-      <button class="btn btn-primary btn-sm" data-action="save-card" data-id="${a.id}">💾 Save account details</button>
-      ${a.phase==='eval'?`<button class="btn btn-green btn-sm" data-action="upgrade" data-id="${a.id}">⬆ Upgrade to funded</button>`:''}
-      <button class="btn btn-ghost btn-sm" data-action="edit-modal" data-id="${a.id}">Edit details</button>
-      <button class="btn btn-danger btn-sm" data-action="remove" data-id="${a.id}">Remove account</button>
-      <span class="acct-save-fb" id="fb-${a.id}"></span>
-    </div>`;
-}
-
-// ─── Card toggle ─────────────────────────────────────────────────────────────
-window.toggleCard = function(id) {
-  expandedId = expandedId === id ? null : id;
-  renderAccounts();
-};
-
-// ─── Delegated click handler for all account card actions ─────────────────────
-// Using event delegation instead of inline onclick avoids any issue with
-// special characters in account IDs breaking the HTML attribute strings.
-document.getElementById('accounts-grid').addEventListener('click', (e) => {
-  const target = e.target.closest('[data-action]');
-  if (!target) return;
-  const action = target.dataset.action;
-  const id     = target.dataset.id;
-
-  if (action === 'toggle')         toggleCard(id);
-  else if (action === 'log-payout')    logPayout(id);
-  else if (action === 'delete-payout') deletePayout(id, target.dataset.payoutId);
-  else if (action === 'save-card')     saveCardEdit(id);
-  else if (action === 'upgrade')       upgradeToFunded(id);
-  else if (action === 'edit-modal')    openEditModal(id);
-  else if (action === 'remove')        removeAccount(id);
-});
-
-document.getElementById('accounts-grid').addEventListener('change', (e) => {
-  if (e.target.matches('[id^="e-phase-"]')) {
-    const id = e.target.id.replace('e-phase-', '');
-    onPhaseChange(id);
-  }
-});
-
-// ─── Phase change inside card (show/hide funded fields) ───────────────────────
-window.onPhaseChange = function(id) {
-  // Re-render body only
-  const body = document.getElementById('body-'+id);
-  const a    = accounts.find(x => x.id === id);
-  const sel  = document.getElementById('e-phase-'+id);
-  if (!a || !sel || !body) return;
-  const tempA = {...a, phase: sel.value};
-  body.innerHTML = renderCardBody(tempA);
-};
-
-// ─── Save card edits ─────────────────────────────────────────────────────────
-window.saveCardEdit = function(id) {
-  const a     = accounts.find(x => x.id === id);
-  if (!a) return;
-  const newId    = document.getElementById('e-id-'+id)?.value.trim();
-  const newFirm  = document.getElementById('e-firm-'+id)?.value.trim();
-  const newPhase = document.getElementById('e-phase-'+id)?.value;
-  const newStart = parseFloat(document.getElementById('e-start-'+id)?.value);
-  const newBal   = parseFloat(document.getElementById('e-bal-'+id)?.value);
-  const newTarget= parseFloat(document.getElementById('e-target-'+id)?.value);
-  const newProj  = parseFloat(document.getElementById('e-proj-'+id)?.value) || null;
-  const newFloor = parseFloat(document.getElementById('e-floor-'+id)?.value) || null;
-  const newWdafter=parseFloat(document.getElementById('e-wdafter-'+id)?.value) || null;
-  const newSplit = parseFloat(document.getElementById('e-split-'+id)?.value) || a.split || 80;
-
-  if (!newId || !newFirm || isNaN(newStart) || isNaN(newBal) || isNaN(newTarget)) {
-    const fb = document.getElementById('fb-'+id);
-    if (fb) { fb.textContent = 'Fill in all required fields.'; fb.style.color='var(--red)'; }
-    return;
-  }
-
-  // If ID changed, update the key
-  const oldId = a.id;
-  a.id      = newId;
-  a.firm    = newFirm;
-  a.phase   = newPhase;
-  a.start   = newStart;
-  a.balance = newBal;
-  a.target  = newTarget;
-  a.dailyProj = newProj;
-  a.floor   = newFloor;
-  a.wdafter = newWdafter;
-  a.split   = newSplit;
-  if (expandedId === oldId) expandedId = newId;
-
-  save();
-  renderAccounts();
-
-  // Show feedback after re-render
-  const fb = document.getElementById('fb-'+newId);
-  if (fb) { fb.textContent = 'Saved ✓'; setTimeout(() => { if(fb) fb.textContent=''; }, 2500); }
-};
-
-// ─── Upgrade to funded ────────────────────────────────────────────────────────
-window.upgradeToFunded = function(id) {
-  const a = accounts.find(x => x.id === id);
-  if (!a) return;
-  // Read current card values first
-  const newBal    = parseFloat(document.getElementById('e-bal-'+id)?.value) || a.balance;
-  const newTarget = parseFloat(document.getElementById('e-target-'+id)?.value) || a.target;
-
-  // Prompt for funded details
-  const trigger = prompt(`Withdrawal trigger for funded account (current target: ${fmt(newTarget)}):`, newTarget);
-  if (trigger === null) return;
-  const after   = prompt('Balance after withdrawal ($):', '');
-  if (after === null) return;
-  const floor   = prompt('Floor (locked drawdown) ($):', '');
-  if (floor === null) return;
-  const split   = prompt('Profit split — your % (e.g. 80 or 90):', a.split || 80);
-  if (split === null) return;
-
-  a.phase   = 'funded';
-  a.balance = newBal;
-  a.target  = parseFloat(trigger) || newTarget;
-  a.wdafter = parseFloat(after)   || null;
-  a.floor   = parseFloat(floor)   || null;
-  a.split   = parseFloat(split)   || 80;
-  if (!a.payouts) a.payouts = [];
-  save();
-  renderAccounts();
-};
-
-// ─── Remove account ───────────────────────────────────────────────────────────
-window.removeAccount = function(id) {
-  const a = accounts.find(x => x.id === id);
-  if (!a) return;
-  if (!confirm(`Remove account ${a.id} (${a.firm})? This cannot be undone.`)) return;
-  accounts = accounts.filter(x => x.id !== id);
-  if (expandedId === id) expandedId = null;
-  save();
-  renderAccounts();
-  renderSummary();
-};
-
-// ─── Payouts ──────────────────────────────────────────────────────────────────
-window.logPayout = function(id) {
-  const a = accounts.find(x => x.id === id);
-  if (!a) return;
-  const amtInput   = document.getElementById('po-amt-'+id);
-  const dateInput  = document.getElementById('po-date-'+id);
-  const afterInput = document.getElementById('po-after-'+id);
-  const fb         = document.getElementById('po-fb-'+id);
-
-  const amount = parseFloat(amtInput?.value);
-  const date   = dateInput?.value || new Date().toISOString().split('T')[0];
-  const after  = parseFloat(afterInput?.value);
-
-  if (isNaN(amount) || amount <= 0) {
-    if (fb) { fb.textContent = 'Enter a valid payout amount.'; fb.style.color = 'var(--red)'; }
-    return;
-  }
-  if (isNaN(after)) {
-    if (fb) { fb.textContent = 'Enter the balance after the payout.'; fb.style.color = 'var(--red)'; }
-    return;
-  }
-
-  if (!a.payouts) a.payouts = [];
-  a.payouts.push({
-    id: uid(),
-    date,
-    amount,
-    split: a.split || 80,
-    balanceBefore: a.balance,
-    balanceAfter: after,
-  });
-  a.balance = after;
-
-  save();
-  renderAccounts();
-  renderSummary();
-};
-
-window.deletePayout = function(accountId, payoutId) {
-  const a = accounts.find(x => x.id === accountId);
-  if (!a || !a.payouts) return;
-  if (!confirm('Delete this payout record? This will NOT restore the account balance.')) return;
-  a.payouts = a.payouts.filter(p => p.id !== payoutId);
-  save();
-  renderAccounts();
-  renderSummary();
-};
-
-// ─── Global projection ────────────────────────────────────────────────────────
-document.getElementById('apply-global-proj').addEventListener('click', () => {
-  const val = parseFloat(document.getElementById('global-proj-val').value);
-  if (isNaN(val) || val <= 0) return;
-  accounts.forEach(a => a.dailyProj = val);
-  save();
-  renderAccounts();
-});
-
-// ─── Add / Edit modal ─────────────────────────────────────────────────────────
-function updateFirmSuggestions() {
-  const dl = document.getElementById('firm-suggestions');
-  if (dl) dl.innerHTML = getFirms().map(f => `<option value="${f}">`).join('');
-}
-
-function showFundedFields(show) {
-  ['funded-section','f-floor-wrap','f-wdtrigger-wrap','f-wdafter-wrap','f-split-wrap'].forEach(id => {
-    const el = document.getElementById(id);
-    if (el) el.style.display = show ? '' : 'none';
-  });
-  const lbl = document.getElementById('m-target-label');
-  if (lbl) lbl.textContent = show ? 'Withdrawal trigger ($)' : 'Eval target ($)';
-}
-
-document.getElementById('m-phase').addEventListener('change', function() {
-  showFundedFields(this.value === 'funded');
-});
-
-window.openAddModal = function() {
-  editingId = null;
-  document.getElementById('modal-title').textContent = 'Add account';
-  document.getElementById('modal-save').textContent  = 'Add account';
-  document.getElementById('m-firm').value    = '';
-  document.getElementById('m-id').value      = '';
-  document.getElementById('m-phase').value   = 'eval';
-  document.getElementById('m-start').value   = '';
-  document.getElementById('m-balance').value = '';
-  document.getElementById('m-target').value  = '';
-  document.getElementById('m-floor').value   = '';
-  document.getElementById('m-wdtrigger').value = '';
-  document.getElementById('m-wdafter').value   = '';
-  document.getElementById('m-split').value     = '80';
-  document.getElementById('modal-err').textContent = '';
-  showFundedFields(false);
-  updateFirmSuggestions();
-  document.getElementById('add-modal').classList.add('open');
-  document.getElementById('m-firm').focus();
-};
-
-window.openEditModal = function(id) {
-  const a = accounts.find(x => x.id === id);
-  if (!a) return;
-  editingId = id;
-  document.getElementById('modal-title').textContent = 'Edit account';
-  document.getElementById('modal-save').textContent  = 'Save changes';
-  document.getElementById('m-firm').value    = a.firm;
-  document.getElementById('m-id').value      = a.id;
-  document.getElementById('m-phase').value   = a.phase;
-  document.getElementById('m-start').value   = a.start;
-  document.getElementById('m-balance').value = a.balance;
-  document.getElementById('m-target').value  = a.target;
-  document.getElementById('m-floor').value   = a.floor   || '';
-  document.getElementById('m-wdtrigger').value = a.phase==='funded' ? a.target : '';
-  document.getElementById('m-wdafter').value   = a.wdafter || '';
-  document.getElementById('m-split').value     = a.split || 80;
-  document.getElementById('modal-err').textContent = '';
-  showFundedFields(a.phase === 'funded');
-  updateFirmSuggestions();
-  document.getElementById('add-modal').classList.add('open');
-};
-
-function closeModal() {
-  document.getElementById('add-modal').classList.remove('open');
-  editingId = null;
-}
-
-document.getElementById('modal-cancel').addEventListener('click', closeModal);
-document.getElementById('add-modal').addEventListener('click', e => {
-  if (e.target === document.getElementById('add-modal')) closeModal();
-});
-
-document.getElementById('modal-save').addEventListener('click', () => {
-  const firm    = document.getElementById('m-firm').value.trim();
-  const id      = document.getElementById('m-id').value.trim();
-  const phase   = document.getElementById('m-phase').value;
-  const start   = parseFloat(document.getElementById('m-start').value);
-  const balance = parseFloat(document.getElementById('m-balance').value || document.getElementById('m-start').value);
-  const target  = parseFloat(document.getElementById('m-target').value);
-  const floor   = parseFloat(document.getElementById('m-floor').value)   || null;
-  const wdafter = parseFloat(document.getElementById('m-wdafter').value) || null;
-  const split   = parseFloat(document.getElementById('m-split').value)   || 80;
-  const err     = document.getElementById('modal-err');
-
-  if (!firm)             { err.textContent='Firm name is required.';      return; }
-  if (!id)               { err.textContent='Account ID is required.';     return; }
-  if (isNaN(start))      { err.textContent='Starting balance is required.'; return; }
-  if (isNaN(target))     { err.textContent='Target is required.';         return; }
-
-  // Check duplicate ID
-  const dupCheck = accounts.find(a => a.id === id && a.id !== editingId);
-  if (dupCheck) { err.textContent='An account with this ID already exists.'; return; }
-
-  if (editingId) {
-    const a = accounts.find(x => x.id === editingId);
-    if (a) {
-      a.id      = id;
-      a.firm    = firm;
-      a.phase   = phase;
-      a.start   = start;
-      a.balance = isNaN(balance) ? start : balance;
-      a.target  = target;
-      a.floor   = floor;
-      a.wdafter = wdafter;
-      a.split   = split;
-      if (expandedId === editingId) expandedId = id;
-    }
-  } else {
-    accounts.push({
-      id, firm, phase, start,
-      balance: isNaN(balance) ? start : balance,
-      target, floor, wdafter, split,
-      dailyProj: null,
-      payouts: [],
-    });
-  }
-
-  save();
-  closeModal();
-  renderAccounts();
-  renderSummary();
-});
-
-// ─── Add account button ───────────────────────────────────────────────────────
-document.getElementById('add-acct-btn').addEventListener('click', openAddModal);
-
-// ─── Firm + Phase filter chips ────────────────────────────────────────────────
-document.getElementById('firm-chips').addEventListener('click', e => {
-  const btn = e.target.closest('[data-firm]');
-  if (!btn) return;
-  filterFirm = btn.dataset.firm;
-  renderAccounts();
-});
-document.getElementById('phase-chips').addEventListener('click', e => {
-  const btn = e.target.closest('[data-phase]');
-  if (!btn) return;
-  filterPhase = btn.dataset.phase;
-  document.querySelectorAll('[data-phase]').forEach(b => b.classList.toggle('active', b===btn));
-  renderAccounts();
-});
-
-// ─── Summary page ─────────────────────────────────────────────────────────────
-function renderSummary() {
-  const all      = accounts;
-  const evalAcc  = all.filter(a => a.phase==='eval');
-  const fundAcc  = all.filter(a => a.phase==='funded');
-  const totalPnl = all.reduce((s,a) => s+getPnl(a), 0);
-  const readyWd  = fundAcc.filter(a => a.balance >= a.target).length;
-  const firms    = getFirms();
-
-  document.getElementById('sum-kpi-strip').innerHTML = `
-    <div class="kpi"><div class="kl">Total accounts</div><div class="kv">${all.length}</div><div class="ks">${firms.length} firm${firms.length!==1?'s':''}</div></div>
-    <div class="kpi"><div class="kl">In eval</div><div class="kv amber">${evalAcc.length}</div><div class="ks">toward target</div></div>
-    <div class="kpi"><div class="kl">Funded</div><div class="kv green">${fundAcc.length}</div><div class="ks">drawdown locked</div></div>
-    <div class="kpi"><div class="kl">Total P&amp;L</div><div class="kv ${totalPnl>=0?'green':'red'}">${fmtS(totalPnl)}</div><div class="ks">all accounts</div></div>
-    <div class="kpi"><div class="kl">Ready to withdraw</div><div class="kv ${readyWd>0?'green':'blue'}">${readyWd}</div><div class="ks">at trigger</div></div>
-  `;
-
-  if (!firms.length) {
-    document.getElementById('sum-by-firm').innerHTML = `<div class="empty"><div class="empty-icon">📋</div><p>Add accounts to see the summary.</p></div>`;
-    return;
-  }
-
-  document.getElementById('sum-by-firm').innerHTML = firms.map(firm => {
-    const faccts  = all.filter(a => a.firm === firm);
-    const fpnl    = faccts.reduce((s,a) => s+getPnl(a), 0);
-    const feval   = faccts.filter(a => a.phase==='eval').length;
-    const ffunded = faccts.filter(a => a.phase==='funded').length;
-    const rows    = faccts.map(a => {
-      const pnl  = getPnl(a);
-      const pct  = getPct(a);
-      const days = getDays(a);
-      const rem  = getRemaining(a);
-      return `<tr style="background:var(--s1);">
-        <td style="padding:9px 12px;font-family:var(--mono);font-size:12px;color:var(--t2);">${a.id}</td>
-        <td style="padding:9px 12px;text-align:center;">${a.phase==='eval'?`<span class="badge badge-eval">Eval</span>`:`<span class="badge badge-funded">Funded</span>`}</td>
-        <td style="padding:9px 12px;font-family:var(--mono);text-align:right;">${fmt(a.balance)}</td>
-        <td style="padding:9px 12px;font-family:var(--mono);text-align:right;color:${pnl>=0?'var(--green)':'var(--red)'};">${fmtS(pnl)}</td>
-        <td style="padding:9px 12px;text-align:right;min-width:120px;">
-          <div style="font-size:11px;font-family:var(--mono);color:var(--${getColor(a)});margin-bottom:3px;">${pct.toFixed(1)}%</div>
-          <div style="height:4px;background:var(--border);border-radius:2px;overflow:hidden;"><div style="height:100%;border-radius:2px;background:var(--${getColor(a)});width:${pct.toFixed(1)}%"></div></div>
-        </td>
-        <td style="padding:9px 12px;font-family:var(--mono);font-size:12px;color:var(--amber);text-align:right;">${rem>0?fmt(rem):'✓'}</td>
-        <td style="padding:9px 12px;font-size:12px;color:var(--t3);text-align:right;">${days!==null?(days>0?'~'+days+'d':'done'):'—'}</td>
-      </tr>`;
-    }).join('');
-
-    return `<div style="margin-bottom:24px;">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;flex-wrap:wrap;gap:8px;">
-        <div>
-          <span style="font-size:14px;font-weight:600;">${firm}</span>
-          <span style="font-size:12px;color:var(--t3);margin-left:10px;">${faccts.length} account${faccts.length!==1?'s':''} · ${feval} eval · ${ffunded} funded</span>
-        </div>
-        <span style="font-family:var(--mono);font-size:14px;font-weight:500;color:${fpnl>=0?'var(--green)':'var(--red)'};">${fmtS(fpnl)}</span>
-      </div>
-      <div style="overflow-x:auto;background:var(--s1);border:1px solid var(--border);border-radius:var(--rl);">
-        <table style="width:100%;border-collapse:separate;border-spacing:0 3px;min-width:600px;">
-          <thead><tr style="border-bottom:1px solid var(--border);">
-            <th style="font-size:10px;color:var(--t3);font-weight:500;text-transform:uppercase;letter-spacing:.05em;padding:8px 12px;text-align:left;">Account</th>
-            <th style="font-size:10px;color:var(--t3);font-weight:500;text-transform:uppercase;letter-spacing:.05em;padding:8px 12px;text-align:center;">Phase</th>
-            <th style="font-size:10px;color:var(--t3);font-weight:500;text-transform:uppercase;letter-spacing:.05em;padding:8px 12px;text-align:right;">Balance</th>
-            <th style="font-size:10px;color:var(--t3);font-weight:500;text-transform:uppercase;letter-spacing:.05em;padding:8px 12px;text-align:right;">P&amp;L</th>
-            <th style="font-size:10px;color:var(--t3);font-weight:500;text-transform:uppercase;letter-spacing:.05em;padding:8px 12px;text-align:right;">Progress</th>
-            <th style="font-size:10px;color:var(--t3);font-weight:500;text-transform:uppercase;letter-spacing:.05em;padding:8px 12px;text-align:right;">To milestone</th>
-            <th style="font-size:10px;color:var(--t3);font-weight:500;text-transform:uppercase;letter-spacing:.05em;padding:8px 12px;text-align:right;">Days left</th>
-          </tr></thead>
-          <tbody>${rows}</tbody>
-        </table>
-      </div>
-    </div>`;
-  }).join('');
-}
-
-// ─── Payouts page ─────────────────────────────────────────────────────────────
-function getAllPayouts() {
-  // Flatten all payouts with account/firm context attached
-  const all = [];
-  accounts.forEach(a => {
-    (a.payouts || []).forEach(p => {
-      all.push({ ...p, accountId: a.id, firm: a.firm });
-    });
-  });
-  return all.sort((x,y) => y.date.localeCompare(x.date));
-}
-
-function renderPayouts() {
-  const allPayouts = getAllPayouts();
-  const totalGross = allPayouts.reduce((s,p) => s + p.amount, 0);
-  const totalTake  = allPayouts.reduce((s,p) => s + (p.amount * (p.split||80)/100), 0);
-  const firmsFee   = totalGross - totalTake;
-  const pendingAccts = accounts.filter(a => a.phase === 'funded' && a.balance >= a.target);
-  const pendingTotal = pendingAccts.reduce((s,a) => s + (a.balance - a.start), 0);
-
-  document.getElementById('payout-kpi-strip').innerHTML = `
-    <div class="kpi"><div class="kl">Total paid out</div><div class="kv green">${fmt(totalGross)}</div><div class="ks">gross, all firms</div></div>
-    <div class="kpi"><div class="kl">Your take</div><div class="kv green">${fmt(totalTake)}</div><div class="ks">after profit splits</div></div>
-    <div class="kpi"><div class="kl">Firms' cut</div><div class="kv amber">${fmt(firmsFee)}</div><div class="ks">retained by firms</div></div>
-    <div class="kpi"><div class="kl">Payouts logged</div><div class="kv">${allPayouts.length}</div><div class="ks">total transactions</div></div>
-    <div class="kpi"><div class="kl">Ready now</div><div class="kv ${pendingAccts.length>0?'green':'blue'}">${pendingAccts.length}</div><div class="ks">accounts at trigger</div></div>
-  `;
-
-  // By firm
-  const firms = getFirms();
-  if (!firms.length || !allPayouts.length) {
-    document.getElementById('payout-by-firm').innerHTML = `<div style="font-size:12px;color:var(--t3);padding:8px 0;">No payouts logged yet.</div>`;
-  } else {
-    document.getElementById('payout-by-firm').innerHTML = firms.map(firm => {
-      const fp = allPayouts.filter(p => p.firm === firm);
-      if (!fp.length) return '';
-      const total = fp.reduce((s,p) => s+p.amount, 0);
-      const take  = fp.reduce((s,p) => s + (p.amount*(p.split||80)/100), 0);
-      return `<div class="ps-row"><span>${firm} <span style="color:var(--t3);font-size:11px;">(${fp.length})</span></span><span class="ps-val green">${fmt(total)} <span style="color:var(--t3);font-size:11px;">→ you: ${fmt(take)}</span></span></div>`;
-    }).join('') || `<div style="font-size:12px;color:var(--t3);padding:8px 0;">No payouts logged yet.</div>`;
-  }
-
-  // By month
-  if (!allPayouts.length) {
-    document.getElementById('payout-by-month').innerHTML = `<div style="font-size:12px;color:var(--t3);padding:8px 0;">No payouts logged yet.</div>`;
-  } else {
-    const byMonth = {};
-    allPayouts.forEach(p => {
-      const mk = p.date.slice(0,7); // YYYY-MM
-      byMonth[mk] = (byMonth[mk]||0) + p.amount;
-    });
-    const months = Object.keys(byMonth).sort((a,b) => b.localeCompare(a));
-    const maxVal  = Math.max(...Object.values(byMonth));
-    document.getElementById('payout-by-month').innerHTML = months.map(mk => {
-      const val = byMonth[mk];
-      const pct = maxVal > 0 ? (val/maxVal)*100 : 0;
-      const label = new Date(mk+'-01T12:00:00').toLocaleDateString('en-US',{month:'short',year:'numeric'});
-      return `<div class="month-bar-row">
-        <div class="mb-label">${label}</div>
-        <div class="mb-bg"><div class="mb-fill" style="width:${pct.toFixed(1)}%"></div></div>
-        <div class="mb-val">${fmt(val)}</div>
-      </div>`;
-    }).join('');
-  }
-
-  // Pending
-  if (!pendingAccts.length) {
-    document.getElementById('payout-pending').innerHTML = `<div style="font-size:12px;color:var(--t3);padding:8px 0;">No accounts are currently at their withdrawal trigger.</div>`;
-  } else {
-    document.getElementById('payout-pending').innerHTML = pendingAccts.map(a => {
-      const pnl = a.balance - a.start;
-      return `<div class="ps-row">
-        <span>${a.firm} · <span style="font-family:var(--mono);font-size:12px;">${a.id}</span></span>
-        <span class="ps-val green">${fmt(a.balance)} <span style="color:var(--t3);font-size:11px;">(+${fmt(pnl)})</span></span>
-      </div>`;
-    }).join('') + `<div class="payout-total-line"><span>Total available if withdrawn today</span><span>${fmt(pendingTotal)}</span></div>`;
-  }
-
-  // All history
-  if (!allPayouts.length) {
-    document.getElementById('payout-all-history').innerHTML = `<div class="empty"><div class="empty-icon">💸</div><p>No payouts logged yet. Log one from an expanded funded account card.</p></div>`;
-  } else {
-    document.getElementById('payout-all-history').innerHTML = `
-      <div style="overflow-x:auto;">
-        <table style="width:100%;border-collapse:separate;border-spacing:0 3px;min-width:600px;">
-          <thead><tr style="border-bottom:1px solid var(--border);">
-            <th style="font-size:10px;color:var(--t3);font-weight:500;text-transform:uppercase;letter-spacing:.05em;padding:6px 10px;text-align:left;">Date</th>
-            <th style="font-size:10px;color:var(--t3);font-weight:500;text-transform:uppercase;letter-spacing:.05em;padding:6px 10px;text-align:left;">Firm</th>
-            <th style="font-size:10px;color:var(--t3);font-weight:500;text-transform:uppercase;letter-spacing:.05em;padding:6px 10px;text-align:left;">Account</th>
-            <th style="font-size:10px;color:var(--t3);font-weight:500;text-transform:uppercase;letter-spacing:.05em;padding:6px 10px;text-align:right;">Amount</th>
-            <th style="font-size:10px;color:var(--t3);font-weight:500;text-transform:uppercase;letter-spacing:.05em;padding:6px 10px;text-align:right;">Split</th>
-            <th style="font-size:10px;color:var(--t3);font-weight:500;text-transform:uppercase;letter-spacing:.05em;padding:6px 10px;text-align:right;">You keep</th>
-          </tr></thead>
-          <tbody>
-            ${allPayouts.map(p => `<tr style="background:var(--s1);">
-              <td style="padding:8px 10px;font-family:var(--mono);font-size:11px;color:var(--t3);">${p.date}</td>
-              <td style="padding:8px 10px;font-size:12px;">${p.firm}</td>
-              <td style="padding:8px 10px;font-family:var(--mono);font-size:11px;color:var(--t2);">${p.accountId}</td>
-              <td style="padding:8px 10px;font-family:var(--mono);text-align:right;color:var(--green);font-weight:500;">${fmt(p.amount)}</td>
-              <td style="padding:8px 10px;font-family:var(--mono);text-align:right;font-size:11px;color:var(--t3);">${p.split||80}%</td>
-              <td style="padding:8px 10px;font-family:var(--mono);text-align:right;color:var(--green);">${fmt(p.amount*(p.split||80)/100)}</td>
-            </tr>`).join('')}
-          </tbody>
-        </table>
-      </div>`;
-  }
-}
-
-// ─── Navigation ───────────────────────────────────────────────────────────────
-document.querySelectorAll('.nav-btn[data-page]').forEach(btn => {
-  btn.addEventListener('click', () => {
-    document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-    btn.classList.add('active');
-    document.getElementById('page-'+btn.dataset.page).classList.add('active');
-    if (btn.dataset.page === 'summary') renderSummary();
-    else if (btn.dataset.page === 'payouts') renderPayouts();
-    else renderAccounts();
-  });
-});
-
-// ─── Init ─────────────────────────────────────────────────────────────────────
-renderAccounts();
-</script>
-</body>
-</html>
+function buildGrid(k){const row=S.log[k]||{};
+ $('#grid').innerHTML=AC.map((a,j)=>{const sn=M.snaps[j],bal=sn.ph==='e'?sn.bal:a.fb+sn.fpg;return `<label class="eg">${a.n}<small>Balance ${fm2(bal)}</small><input type="number" step="0.01" inputmode="decimal" data-id="${a.id}" placeholder="0" value="${row[a.id]!==undefined?row[a.id]:''}"></label>`}).join('');tot()}
+function tot(){let v=0;document.querySelectorAll('#grid input').forEach(e=>{v+=+e.value||0});$('#daytot').innerHTML='Day total: <b class="'+(v<0?'neg':'pos')+'">'+fm2(v)+'</b>'}
+const msg=t=>{$('#msg').textContent=t};
+function persist(){const j=JSON.stringify({log:S.log,debt:S.debt,t:S.t,t2:S.t2});try{localStorage.setItem('debtTracker',j)}catch(e){}if(store)store.set({json:j}).catch(()=>{})}
+function load(o){if(!o)return;S.log=o.log||{};S.debt=o.debt!==undefined?Math.max(0,+o.debt):o.paid?Math.max(0,DEBT-(+o.paid)):DEBT;S.t=Math.min(100,+o.t||60);S.t2=Math.min(200,+o.t2||100);$('#t').value=S.t;$('#t2').value=S.t2;$('#debt').value=S.debt}
+function defDate(){const n=new Date(),tk=n.getFullYear()+'-'+String(n.getMonth()+1).padStart(2,'0')+'-'+String(n.getDate()).padStart(2,'0');let i=1;for(let j=1;j<ks.length&&ks[j]<=tk;j++)i=j;return ks[i]}
+$('#t').oninput=e=>{S.t=+e.target.value;persist();render()};
+$('#t2').oninput=e=>{S.t2=+e.target.value;persist();render()};
+$('#debt').onchange=e=>{S.debt=Math.max(0,+e.target.value||0);persist();render()};
+$('#dt').onchange=e=>{const k=e.target.value;if(!idx[k]){msg('Pick a weekday from Oct 14, 2026 on.');return}msg('');buildGrid(k)};
+$('#grid').oninput=tot;
+$('#save').onclick=()=>{const k=$('#dt').value;if(!idx[k]){msg('Pick a weekday from Oct 14, 2026 on.');return}
+ const r={};document.querySelectorAll('#grid input').forEach(e=>{if(e.value!=='')r[e.dataset.id]=+e.value});
+ if(Object.keys(r).length)S.log[k]=r;else delete S.log[k];persist();render();buildGrid(k);msg('Saved.')};
+$('#log').onclick=e=>{const k=e.target.dataset.e||e.target.dataset.d;if(!k)return;if(e.target.dataset.d){delete S.log[k];persist();render();buildGrid($('#dt').value)}else{$('#dt').value=k;buildGrid(k);window.scrollTo({top:$('#dt').offsetTop-80,behavior:'smooth'})}};
+$('#dt').value=defDate();render();buildGrid($('#dt').value);
+(async()=>{try{const c=window.claude;if(c&&c.use){const db=await c.use('db'),u=await c.use('user');const id=db&&u?await u.id():null;if(id){store=db.collection('data/users/'+id).doc('tracker');const sn=await store.get();if(sn.exists&&sn.data()&&sn.data().json){load(JSON.parse(sn.data().json));render();buildGrid($('#dt').value);return}}}}catch(e){}
+ try{const j=localStorage.getItem('debtTracker');if(j){load(JSON.parse(j));render();buildGrid($('#dt').value)}}catch(e){}})();
+</script></body></html>
