@@ -69,7 +69,7 @@ table{border-collapse:collapse;width:100%;font-size:.85rem}th,td{padding:6px 8px
 <h2>Logged days</h2>
 <div class="panel scroll"><table id="log"></table></div>
 
-<p class="note">How it works: balances start from your Oct 13 screenshot. Each logged gain or loss moves that account's balance. Days up to your last logged day with no entry count as $0; days after it use the daily goals. An eval is passed when its balance reaches the target; the funded account then restarts at $0 profit. Minimums: Lucid $1,000 profit; Tradeify $1,500 profit (a $26,500 balance from $25,000). Each account keeps that amount as its floor, withdraws on Fridays after its first full Mon-Fri week at the higher goal, and pays 90%. Log only trading results, not withdrawals. Lower Debt remaining when you pay some of the debt from other income; leave it alone for trading payouts, which the projection already counts. Data is saved to your account when available, otherwise in this browser. Market holidays push dates out a few days.</p>
+<p class="note">How it works: balances start from your Oct 13 screenshot. Each logged gain or loss moves that account's balance. Days up to your last logged day with no entry count as $0; days after it use the daily goals. An eval is passed when its balance reaches the target; the funded account then restarts at $0 profit. If the firm hasn't promoted an account yet, press Undo funded to hold it in eval, then Release to funded when it has. You can note the new funded account number on its card. Minimums: Lucid $1,000 profit; Tradeify $1,500 profit (a $26,500 balance from $25,000). Each account keeps that amount as its floor, withdraws on Fridays after its first full Mon-Fri week at the higher goal, and pays 90%. Log only trading results, not withdrawals. Lower Debt remaining when you pay some of the debt from other income; leave it alone for trading payouts, which the projection already counts. Data is saved to your account when available, otherwise in this browser. Market holidays push dates out a few days.</p>
 </main>
 <script>
 const DEBT=33000;
@@ -87,7 +87,7 @@ const AC=[
 ].map(([id,n,f,start,target,u,fb,fd,fx])=>({id,n,f,start,target,u,fb,fd:!!fd,fx:!!fx,share:.9}));
 const dates=[new Date(Date.UTC(2026,9,13))];{let x=Date.UTC(2026,9,14);while(dates.length<420){const g=new Date(x),w=g.getUTCDay();if(w&&w<6)dates.push(g);x+=864e5}}
 const ks=dates.map(g=>g.toISOString().slice(0,10)),idx={};ks.forEach((k,i)=>idx[k]=i);
-const S={log:{},debt:DEBT,t:60,t2:100};
+const S={log:{},debt:DEBT,t:60,t2:100,gate:{},fn:{}};
 function sim(S,useLog){
  const li={};let last=0;
  if(useLog)for(const k in S.log){const i=idx[k];if(i>0){li[i]=S.log[k];last=Math.max(last,i)}}
@@ -98,7 +98,7 @@ function sim(S,useLog){
  for(let d=1;d<400&&done!==0;d++){
   for(const s of st){const a=s.a,g=li[d];
    const pnl=d<=last?(g&&g[a.id]!==undefined?+g[a.id]:0):(s.unl&&!a.fx?S.t2:S.t);
-   if(s.ph==='e'){s.bal+=pnl;if(s.bal>=a.target){s.ph='f';s.E=d}}
+   if(s.ph==='e'){s.bal+=pnl;if(s.bal>=a.target&&d>((S.gate&&S.gate[a.id])||0)){s.ph='f';s.E=d}}
    else{s.fp+=pnl;s.fpg+=pnl;if(!s.unl&&s.fp>=a.u){s.unl=true;s.R=d;let m=d+1;while(dates[m].getUTCDay()!==1)m++;s.W=m+4}}}
   if(d===last)snaps=st.map(cp);
   if(dates[d].getUTCDay()===5){
@@ -111,7 +111,7 @@ function sim(S,useLog){
 //UI
 const $=s=>document.querySelector(s),fmt=n=>(n<0?'-$':'$')+Math.abs(Math.round(n)).toLocaleString('en-US'),fm2=n=>(n<0?'-$':'$')+Math.abs(n).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
 const dtS=g=>g.toLocaleDateString('en-US',{month:'short',day:'numeric',timeZone:'UTC'}),dtF=g=>g.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric',year:'numeric',timeZone:'UTC'});
-let M=null,store=null;
+let M=null,store=null;const esc=t=>String(t).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 function ticks(H,x,y1,y2){let s='';for(let d=1;d<=H;d++)if(d==1||dates[d].getUTCMonth()!==dates[d-1].getUTCMonth()){s+=`<line x1="${x(d)}" x2="${x(d)}" y1="${y1}" y2="${y2}" stroke="var(--line)"/><text x="${x(d)+4}" y="${y1+12}">${dates[d].toLocaleDateString('en-US',{month:'short',timeZone:'UTC'})}</text>`}return s}
 function render(){
  const m=M=sim(S,true),b=sim({log:{},debt:S.debt,t:S.t,t2:S.t2},false),H=Math.max(m.done||60,10);
@@ -123,10 +123,10 @@ function render(){
  $('#stats').innerHTML=`<div><b>${fmt(m.need)}</b><span class="mut">debt remaining</span></div><div><b>${nl}</b><span class="mut">days logged</span></div><div><b class="${tot<0?'neg':'pos'}">${fmt(tot)}</b><span class="mut">logged P&amp;L, all accounts</span></div><div><b>${fmt(AC.reduce((q,a)=>q+a.share*(a.fx?S.t:S.t2)*5,0))}/week</b><span class="mut">steady payout once all are active</span></div>`;
  // cards
  $('#accts').innerHTML=m.st.map((s,j)=>{const a=s.a,sn=m.snaps[j];let lg=0;for(const k in S.log)lg+=S.log[k][a.id]||0;
-  const e=sn.ph==='e',bal=e?sn.bal:a.fb+sn.fpg,pr=e?(sn.bal-a.start)/(a.target-a.start):sn.fp/a.u,cl=e?'':sn.unl?'u':'f',lab=e?'Eval':sn.unl?'Unlocked':'Funded';
-  const t1=e?`Needs ${fm2(Math.max(0,a.target-sn.bal))} to reach ${fmt(a.target)}`:sn.unl?`Floor ${fmt(a.u)} kept, withdrawing weekly`:`Needs ${fm2(Math.max(0,a.u-sn.fp))} more profit to unlock`;
+  const hd=(S.gate[a.id]||0)>=9999,e=sn.ph==='e',bal=e?sn.bal:a.fb+sn.fpg,pr=e?(sn.bal-a.start)/(a.target-a.start):sn.fp/a.u,cl=e?'':sn.unl?'u':'f',lab=e?(hd?'Held in eval':'Eval'):sn.unl?'Unlocked':'Funded';
+  const t1=e?(sn.bal>=a.target?(hd?'Target reached, held in eval':'Target reached, funded from the next trading day'):`Needs ${fm2(Math.max(0,a.target-sn.bal))} to reach ${fmt(a.target)}`):sn.unl?`Floor ${fmt(a.u)} kept, withdrawing weekly`:`Needs ${fm2(Math.max(0,a.u-sn.fp))} more profit to unlock`;
   const t2=[e&&s.E?'Passes '+dtS(dates[s.E]):'',!sn.unl&&s.R?'unlocks '+dtS(dates[s.R]):'',s.W?'first payout '+dtS(dates[s.W]):''].filter(Boolean).join(', ');
-  return `<div class="card"><h3>${a.n}<span class="chip ${cl}">${lab}</span></h3><div class="big">${fm2(bal)}</div><div class="bar"><i style="width:${Math.max(0,Math.min(1,pr))*100}%"></i></div>${t1}<br><span class="mut">${t2||'-'}${t2?' (projected)':''}</span><br><span class="mut">Logged: <span class="${lg<0?'neg':'pos'}">${lg?fm2(lg):'$0.00'}</span></span></div>`}).join('');
+  return `<div class="card"><h3>${esc(a.n)}${S.fn[a.id]?' → '+esc(S.fn[a.id]):''}<span class="chip ${cl}">${lab}</span></h3><div class="big">${fm2(bal)}</div><div class="bar"><i style="width:${Math.max(0,Math.min(1,pr))*100}%"></i></div>${t1}<br><span class="mut">${t2||'-'}${t2?' (projected)':''}</span><br><span class="mut">Logged: <span class="${lg<0?'neg':'pos'}">${lg?fm2(lg):'$0.00'}</span></span>${e?(hd?`<br><button data-rel="${a.id}" style="margin-top:6px">Release to funded</button>`:''):`<br><input data-fn="${a.id}" placeholder="New funded account number" value="${esc(S.fn[a.id]||'')}" style="margin-top:6px;font:inherit;width:100%;border:1px solid var(--line);border-radius:6px;padding:6px 8px;background:var(--bg);color:var(--ink)"><br><button data-undo="${a.id}" style="margin-top:6px">Undo funded</button>`}</div>`}).join('');
  // gantt
  const L=150,W=920,R=14,rh=28,top=30,h=top+rh*AC.length+8,x=d=>L+(W-L-R)*d/H;let g=ticks(H,x,4,h-4);
  m.st.forEach((s,i)=>{const y=top+i*rh+4,E=Math.min(s.E??H,H),r=Math.min(s.R??H,H),w=Math.min(s.W??H,H);
@@ -154,8 +154,8 @@ function buildGrid(k){const row=S.log[k]||{};
  $('#grid').innerHTML=AC.map((a,j)=>{const sn=M.snaps[j],bal=sn.ph==='e'?sn.bal:a.fb+sn.fpg;return `<label class="eg">${a.n}<small>Balance ${fm2(bal)}</small><input type="number" step="0.01" inputmode="decimal" data-id="${a.id}" placeholder="0" value="${row[a.id]!==undefined?row[a.id]:''}"></label>`}).join('');tot()}
 function tot(){let v=0;document.querySelectorAll('#grid input').forEach(e=>{v+=+e.value||0});$('#daytot').innerHTML='Day total: <b class="'+(v<0?'neg':'pos')+'">'+fm2(v)+'</b>'}
 const msg=t=>{$('#msg').textContent=t};
-function persist(){const j=JSON.stringify({log:S.log,debt:S.debt,t:S.t,t2:S.t2});try{localStorage.setItem('debtTracker',j)}catch(e){}if(store)store.set({json:j}).catch(()=>{})}
-function load(o){if(!o)return;S.log=o.log||{};S.debt=o.debt!==undefined?Math.max(0,+o.debt):o.paid?Math.max(0,DEBT-(+o.paid)):DEBT;S.t=Math.min(100,+o.t||60);S.t2=Math.min(200,+o.t2||100);$('#t').value=S.t;$('#t2').value=S.t2;$('#debt').value=S.debt}
+function persist(){const j=JSON.stringify({log:S.log,debt:S.debt,t:S.t,t2:S.t2,gate:S.gate,fn:S.fn});try{localStorage.setItem('debtTracker',j)}catch(e){}if(store)store.set({json:j}).catch(()=>{})}
+function load(o){if(!o)return;S.log=o.log||{};S.gate=o.gate||{};S.fn=o.fn||{};S.debt=o.debt!==undefined?Math.max(0,+o.debt):o.paid?Math.max(0,DEBT-(+o.paid)):DEBT;S.t=Math.min(100,+o.t||60);S.t2=Math.min(200,+o.t2||100);$('#t').value=S.t;$('#t2').value=S.t2;$('#debt').value=S.debt}
 function defDate(){const n=new Date(),tk=n.getFullYear()+'-'+String(n.getMonth()+1).padStart(2,'0')+'-'+String(n.getDate()).padStart(2,'0');let i=1;for(let j=1;j<ks.length&&ks[j]<=tk;j++)i=j;return ks[i]}
 $('#t').oninput=e=>{S.t=+e.target.value;persist();render()};
 $('#t2').oninput=e=>{S.t2=+e.target.value;persist();render()};
@@ -166,6 +166,8 @@ $('#save').onclick=()=>{const k=$('#dt').value;if(!idx[k]){msg('Pick a weekday f
  const r={};document.querySelectorAll('#grid input').forEach(e=>{if(e.value!=='')r[e.dataset.id]=+e.value});
  if(Object.keys(r).length)S.log[k]=r;else delete S.log[k];persist();render();buildGrid(k);msg('Saved.')};
 $('#log').onclick=e=>{const k=e.target.dataset.e||e.target.dataset.d;if(!k)return;if(e.target.dataset.d){delete S.log[k];persist();render();buildGrid($('#dt').value)}else{$('#dt').value=k;buildGrid(k);window.scrollTo({top:$('#dt').offsetTop-80,behavior:'smooth'})}};
+$('#accts').onclick=e=>{const u=e.target.dataset.undo,r=e.target.dataset.rel;if(u)S.gate[u]=9999;else if(r)S.gate[r]=M.last;else return;persist();render();buildGrid($('#dt').value)};
+$('#accts').onchange=e=>{const f=e.target.dataset.fn;if(!f)return;const v=e.target.value.trim();if(v)S.fn[f]=v;else delete S.fn[f];persist();render()};
 $('#dt').value=defDate();render();buildGrid($('#dt').value);
 (async()=>{try{const c=window.claude;if(c&&c.use){const db=await c.use('db'),u=await c.use('user');const id=db&&u?await u.id():null;if(id){store=db.collection('data/users/'+id).doc('tracker');const sn=await store.get();if(sn.exists&&sn.data()&&sn.data().json){load(JSON.parse(sn.data().json));render();buildGrid($('#dt').value);return}}}}catch(e){}
  try{const j=localStorage.getItem('debtTracker');if(j){load(JSON.parse(j));render();buildGrid($('#dt').value)}}catch(e){}})();
