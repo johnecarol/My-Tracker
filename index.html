@@ -37,7 +37,7 @@ table{border-collapse:collapse;width:100%;font-size:.85rem}th,td{padding:6px 8px
 .neg{color:var(--debt)}.pos{color:var(--pay)}
 .note{font-size:.85rem;color:var(--mut);margin-top:26px;max-width:75ch}
 </style></head><body><main>
-<p class="mut" style="margin:0">Debt tracker: Tradeify, Lucid and the 100K static account</p>
+<p class="mut" style="margin:0">Debt tracker: Tradeify and Lucid accounts</p>
 <h1 id="hero"></h1>
 <p id="delta" class="mut" style="margin:0"></p>
 <div class="ctl">
@@ -69,7 +69,7 @@ table{border-collapse:collapse;width:100%;font-size:.85rem}th,td{padding:6px 8px
 <h2>Logged days</h2>
 <div class="panel scroll"><table id="log"></table></div>
 
-<p class="note">How it works: balances start from your Oct 13 screenshot. Each logged gain or loss moves that account's balance. Days up to your last logged day with no entry count as $0; days after it use the daily goals. An eval is passed when its balance reaches the target; the funded account then restarts at $0 profit. Minimums: Lucid $1,000 profit; Tradeify $1,500 profit (a $26,500 balance from $25,000); the 100K account is assumed $1,000. Each account keeps that amount as its floor, withdraws on Fridays after its first full Mon-Fri week at the higher goal, and pays 90%. Log only trading results, not withdrawals. Lower Debt remaining when you pay some of the debt from other income; leave it alone for trading payouts, which the projection already counts. Data is saved to your account when available, otherwise in this browser. Market holidays push dates out a few days.</p>
+<p class="note">How it works: balances start from your Oct 13 screenshot. Each logged gain or loss moves that account's balance. Days up to your last logged day with no entry count as $0; days after it use the daily goals. An eval is passed when its balance reaches the target; the funded account then restarts at $0 profit. Minimums: Lucid $1,000 profit; Tradeify $1,500 profit (a $26,500 balance from $25,000). Each account keeps that amount as its floor, withdraws on Fridays after its first full Mon-Fri week at the higher goal, and pays 90%. Log only trading results, not withdrawals. Lower Debt remaining when you pay some of the debt from other income; leave it alone for trading payouts, which the projection already counts. Data is saved to your account when available, otherwise in this browser. Market holidays push dates out a few days.</p>
 </main>
 <script>
 const DEBT=33000;
@@ -83,8 +83,7 @@ const AC=[
 ["T4577","Tradeify …4577","Tradeify",24986.30,26500,1500,25000],
 ["T5392","Tradeify …5392","Tradeify",25036.65,26500,1500,25000],
 ["T1427","Tradeify …1427","Tradeify",25886.04,26500,1500,25000],
-["T1738","Tradeify …1738 (new eval)","Tradeify",25146.20,26500,1500,25000],
-["S100","Static 100K (funded)","Static",100000,0,1000,100000,1,1]
+["T1738","Tradeify …1738 (new eval)","Tradeify",25146.20,26500,1500,25000]
 ].map(([id,n,f,start,target,u,fb,fd,fx])=>({id,n,f,start,target,u,fb,fd:!!fd,fx:!!fx,share:.9}));
 const dates=[new Date(Date.UTC(2026,9,13))];{let x=Date.UTC(2026,9,14);while(dates.length<420){const g=new Date(x),w=g.getUTCDay();if(w&&w<6)dates.push(g);x+=864e5}}
 const ks=dates.map(g=>g.toISOString().slice(0,10)),idx={};ks.forEach((k,i)=>idx[k]=i);
